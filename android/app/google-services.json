@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "191185633483",
+    "project_id": "turf-arena",
+    "storage_bucket": "turf-arena.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:191185633483:android:be25313ef87d7288419b4e",
+        "android_client_info": {
+          "package_name": "com.example.turf_arena"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "191185633483-n6mmvp416p4hp86bq7ku1vs25icbfv5b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.turf_arena",
+            "certificate_hash": "e985e29911c1f0adc5c056d925961a9f4fef6fe9"
+          }
+        },
+        {
+          "client_id": "191185633483-aca6s9nf9p6sm89h2210itl9mf229jmk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBcdG4HebzrnH3N2r_035AqB772rMSFHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "191185633483-aca6s9nf9p6sm89h2210itl9mf229jmk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
