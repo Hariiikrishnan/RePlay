@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:turf_arena/constants.dart';
 // import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,10 +15,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:turf_arena/screens/app.dart';
 
 class SetProfile extends StatefulWidget {
-  SetProfile(this.userData, this.cameras);
+  SetProfile(this.userData, this.cameras, this.alt);
 
   Map<dynamic, dynamic> userData;
   final List<CameraDescription> cameras;
+  final String alt;
 
   @override
   State<SetProfile> createState() => _SetProfileState();
@@ -76,6 +78,7 @@ class _SetProfileState extends State<SetProfile> {
               userData: widget.userData,
               phoneNo: phoneController.text,
               cameras: widget.cameras,
+              alt: widget.alt,
               // url: downloadUrl,
             ),
           ));
@@ -116,6 +119,7 @@ class _SetProfileState extends State<SetProfile> {
             userData: widget.userData,
             phoneNo: phoneController.text,
             cameras: widget.cameras,
+            alt: widget.alt,
             // url: downloadUrl,
           ),
         ));
@@ -154,7 +158,10 @@ class _SetProfileState extends State<SetProfile> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    initSharedPref();
   }
+
+  String displayName = "";
 
   // Future<String> uploadProfile() async {
   //   print(_image);
@@ -165,6 +172,12 @@ class _SetProfileState extends State<SetProfile> {
   //   var downloadUrl = await (await uploadTask).ref.getDownloadURL();
   //   return downloadUrl;
   // }
+
+  late SharedPreferences prefs;
+
+  void initSharedPref() async {
+    prefs = await SharedPreferences.getInstance();
+  }
 
   Future<String> uploadProfile() async {
     setState(() {
@@ -217,13 +230,39 @@ class _SetProfileState extends State<SetProfile> {
             .collection('users')
             .doc(widget.userData['uid'])
             .set(widget.userData.cast<String, dynamic>());
-        Navigator.of(context).push(_createRoute(
-          App(
-            widget.userData,
-            widget.cameras,
-          ),
+        Navigator.of(context).pushReplacement(_createRoute(
+          App(widget.userData, widget.cameras, widget.alt),
         ));
       }
+    } catch (e) {
+      print('Error adding user to Firestore: $e');
+    }
+  }
+
+  Future<void> updateUserNameToFirestore(newName) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userData['uid'])
+          .update({'displayName': newName});
+      setState(() {
+        // widget.userData['phone'] = widget.phoneNo;
+        widget.userData['displayName'] = newName;
+        progress = 100.0;
+      });
+      prefs.setString('displayName', newName);
+
+      // if (userDoc.exists) {
+      //   setState(() {
+      //     // widget.userData['phone'] = widget.phoneNo;
+      //     widget.userData['displayName'] = newName;
+      //   });
+
+      //   await FirebaseFirestore.instance
+      //       .collection('users')
+      //       .doc(widget.userData['uid'])
+      //       .set(widget.userData.cast<String, dynamic>());
+      // }
     } catch (e) {
       print('Error adding user to Firestore: $e');
     }
@@ -237,19 +276,27 @@ class _SetProfileState extends State<SetProfile> {
       body: Container(
         width: double.infinity,
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.only(
+            top: 30.0,
+            left: 20.0,
+            right: 20.0,
+            bottom: 5.0,
+          ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              SizedBox(
+                height: 50.0,
+              ),
               Container(
                 width: 200.0,
-                // height: 400.0,
+                height: 200.0,
                 child: Stack(
                   children: [
                     CircleAvatar(
                       radius: 180.0,
-                      backgroundColor: whiteColor,
+                      backgroundColor: Colors.grey[200],
                       backgroundImage: _image == null
                           ? null
                           : FileImage(
@@ -262,7 +309,7 @@ class _SetProfileState extends State<SetProfile> {
                           : null,
                     ),
                     Align(
-                      heightFactor: MediaQuery.of(context).size.height / 152,
+                      heightFactor: MediaQuery.of(context).size.height / 175,
                       alignment: Alignment.bottomCenter,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -289,6 +336,26 @@ class _SetProfileState extends State<SetProfile> {
                   ],
                 ),
               ),
+              SizedBox(
+                height: 20.0,
+              ),
+              TextField(
+                onChanged: (value) {
+                  setState(() {
+                    displayName = value;
+                  });
+                },
+                // controller: displayName,
+                // textInputAction: TextInputAction.search,
+                decoration: kLoginFieldDecoration.copyWith(
+                  hintText: 'Display Name',
+                ),
+              ),
+              SizedBox(
+                height: 5.0,
+              ),
+
+              Spacer(),
               // ElevatedButton(
               //     style: ElevatedButton.styleFrom(
               //       fixedSize: Size(150.0, 45.0),
@@ -332,20 +399,29 @@ class _SetProfileState extends State<SetProfile> {
                 builder: (context, double value, child) {
                   return GestureDetector(
                     onTap: () async {
-                      if (_image == null) {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      if (_image == null || displayName == "") {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(
                               30.0,
                             )),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 20.0,
-                              vertical: 20.0,
+                            margin: EdgeInsets.symmetric(
+                              horizontal: 5.0,
+                              vertical: 5.0,
                             ),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 30.0,
+                              vertical: 5.0,
+                            ),
+                            elevation: 50.0,
+                            behavior: SnackBarBehavior.floating,
                             backgroundColor: Colors.red[400],
+                            showCloseIcon: true,
+                            closeIconColor: whiteColor,
                             content: Text(
-                              "Please select an image!",
+                              "Enter All Fields!",
                               style: TextStyle(
                                 fontSize: 17.0,
                               ),
@@ -354,7 +430,7 @@ class _SetProfileState extends State<SetProfile> {
                         );
                       } else {
                         var downloadUrl = await uploadProfile();
-
+                        await updateUserNameToFirestore(displayName);
                         await updateUserToFirestore(downloadUrl);
 
                         setState(() {
@@ -364,7 +440,7 @@ class _SetProfileState extends State<SetProfile> {
                     },
                     child: Container(
                       height: 50,
-                      width: 200,
+                      width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
@@ -385,17 +461,17 @@ class _SetProfileState extends State<SetProfile> {
                       alignment: Alignment.center,
                       child: showSpinner
                           ? Text(
-                              'Upoloading..',
+                              'Uploading',
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
+                                color: whiteColor,
+                                fontSize: 15,
                               ),
                             )
                           : Text(
                               'Add Profile',
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
+                                color: whiteColor,
+                                fontSize: 15,
                               ),
                             ),
                     ),

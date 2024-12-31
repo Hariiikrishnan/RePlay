@@ -14,12 +14,14 @@ class Otpscreen extends StatefulWidget {
     required this.userData,
     required this.phoneNo,
     required this.cameras,
+    required this.alt,
   });
 
   Map<dynamic, dynamic> userData;
   final String verificationId;
   String phoneNo;
   final List<CameraDescription> cameras;
+  final String alt;
   // String url;
   @override
   State<Otpscreen> createState() => _OtpscreenState();
@@ -84,11 +86,15 @@ class _OtpscreenState extends State<Otpscreen> {
       await addUserToFirestore(user);
       print('User registered and added to Firestore');
       Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return App({
-          'u_id': user.uid,
-          'username': user.displayName,
-          'email': user.email,
-        }, widget.cameras);
+        return App(
+          {
+            'u_id': user.uid,
+            'username': user.displayName,
+            'email': user.email,
+          },
+          widget.cameras,
+          widget.alt,
+        );
       }));
     }
   }
@@ -125,10 +131,7 @@ class _OtpscreenState extends State<Otpscreen> {
             .doc(widget.userData['uid'])
             .set(widget.userData.cast<String, dynamic>());
         Navigator.of(context).push(_createRoute(
-          App(
-            widget.userData,
-            widget.cameras,
-          ),
+          App(widget.userData, widget.cameras, widget.alt),
         ));
       }
     } catch (e) {
@@ -148,7 +151,6 @@ class _OtpscreenState extends State<Otpscreen> {
           'email': user.email,
           'displayName': user.displayName ?? '',
           'photoURL': user.photoURL ?? '',
-          'createdAt': FieldValue.serverTimestamp(),
         });
       }
     } catch (e) {
@@ -193,39 +195,6 @@ class _OtpscreenState extends State<Otpscreen> {
     super.dispose();
   }
 
-  // void _verifyOtp(otp) async {
-  //   // String otp = otpController.text.trim();
-
-  //   // Create PhoneAuthCredential with OTP
-  //   PhoneAuthCredential credential = PhoneAuthProvider.credential(
-  //     verificationId: widget.verificationId!,
-  //     smsCode: otp,
-  //   );
-
-  //   // Sign in the user
-  //   try {
-  //     // await _auth.signInWithCredential(credential);
-  //     print("Phone number verified and user signed in.");
-  //     // updateUserToFirestore();
-  //     setState(() {
-  //       widget.userData['phone'] = widget.phoneNo;
-  //     });
-  //     Navigator.of(context).push(_createRoute(
-  //       SetProfile(
-  //         widget.userData,
-  //       ),
-  //     ));
-  //     setState(() {
-  //       showSpinner = false;
-  //     });
-  //   } catch (e) {
-  //     setState(() {
-  //       showSpinner = false;
-  //     });
-  //     print("Failed to sign in: ${e.toString()}");
-  //   }
-  // }
-
   void _verifyOtp(String otp) async {
     // Show spinner while verifying
     setState(() {
@@ -262,17 +231,19 @@ class _OtpscreenState extends State<Otpscreen> {
               borderRadius: BorderRadius.circular(
             30.0,
           )),
-          // margin: EdgeInsets.symmetric(
-          //   horizontal: 20.0,
-          //   vertical: 50.0,
-          // ),
-          padding: EdgeInsets.symmetric(
-            horizontal: 20.0,
-            vertical: 20.0,
+          margin: EdgeInsets.symmetric(
+            horizontal: 5.0,
+            vertical: 5.0,
           ),
-          // elevation: 6.0,
-          // behavior: SnackBarBehavior.floating,
+          padding: EdgeInsets.symmetric(
+            horizontal: 30.0,
+            vertical: 5.0,
+          ),
+          elevation: 50.0,
+          behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.green[400],
+          showCloseIcon: true,
+          closeIconColor: whiteColor,
           content: Text(
             "Phone Number Authenticated.",
             style: TextStyle(
@@ -284,7 +255,7 @@ class _OtpscreenState extends State<Otpscreen> {
       // Navigate to next screen
       Navigator.of(context).pushReplacement(
         _createRoute(
-          SetProfile(widget.userData, widget.cameras),
+          SetProfile(widget.userData, widget.cameras, widget.alt),
         ),
       );
     } on FirebaseAuthException catch (e) {
@@ -320,16 +291,16 @@ class _OtpscreenState extends State<Otpscreen> {
                 borderRadius: BorderRadius.circular(
               30.0,
             )),
-            // margin: EdgeInsets.symmetric(
-            //   horizontal: 20.0,
-            //   vertical: 50.0,
-            // ),
-            padding: EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 20.0,
+            margin: EdgeInsets.symmetric(
+              horizontal: 5.0,
+              vertical: 5.0,
             ),
-            // elevation: 6.0,
-            // behavior: SnackBarBehavior.floating,
+            padding: EdgeInsets.symmetric(
+              horizontal: 30.0,
+              vertical: 5.0,
+            ),
+            elevation: 50.0,
+            behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.red[400],
             content: Text(
               "OTP has expired. Please request a new one.",
@@ -346,16 +317,16 @@ class _OtpscreenState extends State<Otpscreen> {
                 borderRadius: BorderRadius.circular(
               30.0,
             )),
-            // margin: EdgeInsets.symmetric(
-            //   horizontal: 20.0,
-            //   vertical: 50.0,
-            // ),
-            padding: EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 20.0,
+            margin: EdgeInsets.symmetric(
+              horizontal: 5.0,
+              vertical: 5.0,
             ),
-            // elevation: 6.0,
-            // behavior: SnackBarBehavior.floating,
+            padding: EdgeInsets.symmetric(
+              horizontal: 30.0,
+              vertical: 5.0,
+            ),
+            elevation: 50.0,
+            behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.red[400],
             content: Text(
               "Failed to verify OTP: ${e.message}",
@@ -378,16 +349,16 @@ class _OtpscreenState extends State<Otpscreen> {
               borderRadius: BorderRadius.circular(
             30.0,
           )),
-          // margin: EdgeInsets.symmetric(
-          //   horizontal: 20.0,
-          //   vertical: 50.0,
-          // ),
-          padding: EdgeInsets.symmetric(
-            horizontal: 20.0,
+          margin: EdgeInsets.symmetric(
+            horizontal: 5.0,
             vertical: 5.0,
           ),
-          // elevation: 6.0,
-          // behavior: SnackBarBehavior.floating,
+          padding: EdgeInsets.symmetric(
+            horizontal: 30.0,
+            vertical: 5.0,
+          ),
+          elevation: 50.0,
+          behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.red[400],
           content: Text("An error occurred: ${e.toString()}"),
         ),
@@ -397,6 +368,19 @@ class _OtpscreenState extends State<Otpscreen> {
       setState(() {
         showSpinner = false;
       });
+    }
+  }
+
+  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
+
+  void changeFocus(String value, int index) {
+    print(value);
+    if (value.isEmpty && index > 0) {
+      // print("Activating previous focus");
+      FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
+    } else if (value.length == 1 && index < _focusNodes.length - 1) {
+      // print("Activating next focus");
+      FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
     }
   }
 
@@ -421,14 +405,15 @@ class _OtpscreenState extends State<Otpscreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Image(
-                        image: AssetImage("images/logo.png"),
+                        image: AssetImage("images/app_icon.png"),
+                        height: 50.0,
                       ),
                       Text(
-                        "Verification",
+                        "Enter OTP",
                         style: TextStyle(
                           color: whiteColor,
-                          fontSize: 30.0,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w500,
                         ),
                       )
                     ],
@@ -441,7 +426,7 @@ class _OtpscreenState extends State<Otpscreen> {
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: secondaryColor,
+                  color: whiteColor,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(50.0),
                     topRight: Radius.circular(50.0),
@@ -471,6 +456,7 @@ class _OtpscreenState extends State<Otpscreen> {
                                 ),
                                 textAlign: TextAlign.start,
                                 maxLength: 1,
+                                focusNode: _focusNodes[0],
                                 buildCounter: (context,
                                         {required currentLength,
                                         required isFocused,
@@ -478,9 +464,7 @@ class _OtpscreenState extends State<Otpscreen> {
                                     null,
                                 keyboardType: TextInputType.number,
                                 onChanged: (value) {
-                                  print(value);
-                                  if (value.length == 1)
-                                    FocusScope.of(context).nextFocus();
+                                  changeFocus(value, 0);
                                 },
                               ),
                             ),
@@ -497,6 +481,7 @@ class _OtpscreenState extends State<Otpscreen> {
                                   fontSize: 18.0,
                                 ),
                                 maxLength: 1,
+                                focusNode: _focusNodes[1],
                                 buildCounter: (context,
                                         {required currentLength,
                                         required isFocused,
@@ -504,8 +489,7 @@ class _OtpscreenState extends State<Otpscreen> {
                                     null,
                                 keyboardType: TextInputType.number,
                                 onChanged: (value) {
-                                  if (value.length == 1)
-                                    FocusScope.of(context).nextFocus();
+                                  changeFocus(value, 1);
                                 },
                               ),
                             ),
@@ -522,6 +506,7 @@ class _OtpscreenState extends State<Otpscreen> {
                                   fontSize: 18.0,
                                 ),
                                 maxLength: 1,
+                                focusNode: _focusNodes[2],
                                 buildCounter: (context,
                                         {required currentLength,
                                         required isFocused,
@@ -529,8 +514,7 @@ class _OtpscreenState extends State<Otpscreen> {
                                     null,
                                 keyboardType: TextInputType.number,
                                 onChanged: (value) {
-                                  if (value.length == 1)
-                                    FocusScope.of(context).nextFocus();
+                                  changeFocus(value, 2);
                                 },
                               ),
                             ),
@@ -547,6 +531,7 @@ class _OtpscreenState extends State<Otpscreen> {
                                   fontSize: 18.0,
                                 ),
                                 maxLength: 1,
+                                focusNode: _focusNodes[3],
                                 buildCounter: (context,
                                         {required currentLength,
                                         required isFocused,
@@ -554,8 +539,7 @@ class _OtpscreenState extends State<Otpscreen> {
                                     null,
                                 keyboardType: TextInputType.number,
                                 onChanged: (value) {
-                                  if (value.length == 1)
-                                    FocusScope.of(context).nextFocus();
+                                  changeFocus(value, 3);
                                 },
                               ),
                             ),
@@ -572,6 +556,7 @@ class _OtpscreenState extends State<Otpscreen> {
                                   fontSize: 18.0,
                                 ),
                                 maxLength: 1,
+                                focusNode: _focusNodes[4],
                                 buildCounter: (context,
                                         {required currentLength,
                                         required isFocused,
@@ -579,8 +564,7 @@ class _OtpscreenState extends State<Otpscreen> {
                                     null,
                                 keyboardType: TextInputType.number,
                                 onChanged: (value) {
-                                  if (value.length == 1)
-                                    FocusScope.of(context).nextFocus();
+                                  changeFocus(value, 4);
                                 },
                               ),
                             ),
@@ -597,6 +581,7 @@ class _OtpscreenState extends State<Otpscreen> {
                                   fontSize: 18.0,
                                 ),
                                 maxLength: 1,
+                                focusNode: _focusNodes[5],
                                 buildCounter: (context,
                                         {required currentLength,
                                         required isFocused,
@@ -604,8 +589,7 @@ class _OtpscreenState extends State<Otpscreen> {
                                     null,
                                 keyboardType: TextInputType.number,
                                 onChanged: (value) {
-                                  if (value.length == 1)
-                                    FocusScope.of(context).nextFocus();
+                                  changeFocus(value, 5);
                                 },
                               ),
                             ),
@@ -624,14 +608,15 @@ class _OtpscreenState extends State<Otpscreen> {
                           child: Text(
                             "Resend the code?",
                             style: TextStyle(
-                              color: Colors.grey[400],
-                              fontSize: 18.0,
+                              color: Colors.grey[500],
+                              fontSize: 16.0,
                             ),
                           ),
                         ),
                       ),
                       TextButton.icon(
                         onPressed: () {
+                          FocusManager.instance.primaryFocus?.unfocus();
                           setState(() {
                             showSpinner = true;
                           });
@@ -659,14 +644,8 @@ class _OtpscreenState extends State<Otpscreen> {
                               color: whiteColor,
                             ),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30.0),
+                              borderRadius: BorderRadius.circular(12.0),
                             )),
-                        icon: !showSpinner
-                            ? Icon(
-                                Icons.arrow_forward,
-                                color: whiteColor,
-                              )
-                            : null,
                         iconAlignment: IconAlignment.end,
                         label: showSpinner
                             ? Transform.scale(

@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'dart:ui';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:turf_arena/constants.dart';
+import 'package:turf_arena/screens/AdminDashBoard.dart';
 import 'package:turf_arena/screens/RegisterScreen.dart';
 import 'package:turf_arena/screens/app.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,8 +15,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:camera/camera.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key, required this.cameras});
+  const LoginScreen({super.key, required this.cameras, required this.alt});
   final List<CameraDescription> cameras;
+  final String alt;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -28,23 +32,37 @@ class _LoginScreenState extends State<LoginScreen> {
   String? password;
   late Map userDetails;
 
+  late SharedPreferences prefs;
+
+  void initSharedPref() async {
+    prefs = await SharedPreferences.getInstance();
+  }
+
   SnackBar snackBar(String msg) {
     return SnackBar(
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(
         30.0,
       )),
-      padding: EdgeInsets.symmetric(
-        horizontal: 20.0,
-        vertical: 20.0,
+      margin: EdgeInsets.symmetric(
+        horizontal: 5.0,
+        vertical: 5.0,
       ),
+      padding: EdgeInsets.symmetric(
+        horizontal: 30.0,
+        vertical: 5.0,
+      ),
+      elevation: 50.0,
+      behavior: SnackBarBehavior.floating,
       backgroundColor: Colors.red[400],
       content: Text(
         msg,
         style: TextStyle(
-          fontSize: 17.0,
+          fontSize: 15.0,
         ),
       ),
+      showCloseIcon: true,
+      closeIconColor: whiteColor,
     );
   }
 
@@ -85,19 +103,51 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (user != null) {
         // Access and print the user's display name (username) and email
-        print('Username: ${user.displayName}');
-        print('Email: ${user.email}');
+        // print('Username: ${user.displayName}');
+        // print('Email: ${user.email}');
         setState(() {
           loadGoogleSign = false;
           isLoaded = true;
         });
         await fetchUser(user);
-        Navigator.of(context).push(
-          _createRoute(
-            App(userDetails, widget.cameras),
-          ),
-        );
+        print(user.displayName);
+        String strJsonString = "";
+        if (userDetails['moments'].length != 0) {
+          strJsonString = json.encode(userDetails['moments']);
+        }
+        print(strJsonString);
+        prefs.setString('email', userDetails['email']);
+        prefs.setBool('isAdmin', userDetails['isAdmin']);
+        prefs.setStringList(
+            'liked', List<String>.from(userDetails['liked'] as List));
+        prefs.setString('moments', strJsonString);
+        prefs.setString('displayName', userDetails['displayName']);
+        prefs.setString('photoURL', userDetails['photoURL']);
+        prefs.setString('uid', userDetails['uid']);
+
+        print("Stored");
+
+        print(prefs.getString('email'));
+        if (userDetails['isAdmin']) {
+          Navigator.of(context).push(
+            _createRoute(
+              Admindashboard(userDetails, widget.cameras, widget.alt),
+            ),
+          );
+        } else {
+          Navigator.of(context).pushReplacement(
+            _createRoute(
+              App(userDetails, widget.cameras, widget.alt),
+            ),
+          );
+
+          print("Navigated");
+        }
       } else {
+        setState(() {
+          loadGoogleSign = false;
+          isLoaded = false;
+        });
         ScaffoldMessenger.of(context)
             .showSnackBar(snackBar("Try Register and then Sign In."));
       }
@@ -106,8 +156,13 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       // TODO
       // print(e.code);
+      setState(() {
+        loadGoogleSign = false;
+        isLoaded = false;
+      });
       ScaffoldMessenger.of(context)
           .showSnackBar(snackBar("Error Occured. Try Again!"));
+      print(e);
     }
   }
 
@@ -122,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // setState(() {
       // loadingData = false;
       // _isLoading = false;
-      print(snapshot.docs);
+      // print(snapshot.docs);
       if (snapshot.docs.isEmpty) {
         setState(() {
           isLoaded = false;
@@ -131,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
             .showSnackBar(snackBar("Please Try Again!"));
       } else {
         snapshot.docs.forEach((doc) {
-          print(doc.data());
+          // print(doc.data());
           setState(() {
             userDetails = doc.data() as Map<String, dynamic>;
           });
@@ -141,6 +196,9 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (error) {
       print("Error getting documents: $error");
+      setState(() {
+        loadGoogleSign = false;
+      });
     }
   }
 
@@ -151,6 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
     isLoaded = false;
     loadGoogleSign = false;
     showSpinner = false;
+    initSharedPref();
   }
 
   Route _createRoute(Widget ScreenName) {
@@ -232,7 +291,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         "Experience the Turf Again.",
                         style: TextStyle(
-                          color: Colors.grey[500],
+                          color: primaryColor.withOpacity(0.4),
                           fontSize: 20.0,
                           fontWeight: FontWeight.w500,
                         ),
@@ -318,6 +377,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               TextButton(
                                 onPressed: () async {
+                                  FocusManager.instance.primaryFocus?.unfocus();
                                   if (username == null || password == null) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
@@ -325,11 +385,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                             borderRadius: BorderRadius.circular(
                                           30.0,
                                         )),
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 20.0,
-                                          vertical: 20.0,
+                                        margin: EdgeInsets.symmetric(
+                                          horizontal: 5.0,
+                                          vertical: 5.0,
                                         ),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 30.0,
+                                          vertical: 5.0,
+                                        ),
+                                        elevation: 50.0,
+                                        behavior: SnackBarBehavior.floating,
                                         backgroundColor: Colors.red[400],
+                                        showCloseIcon: true,
+                                        closeIconColor: whiteColor,
                                         content: Text(
                                           "Enter all Fields!",
                                           style: TextStyle(
@@ -352,18 +420,56 @@ class _LoginScreenState extends State<LoginScreen> {
                                       if (loggedInUser != null) {
                                         print("Logged");
                                         await fetchUser(loggedInUser.user!);
-                                        Navigator.of(context).push(
-                                          _createRoute(
-                                            App(userDetails, widget.cameras),
-                                          ),
-                                        );
+
+                                        String strJsonString = "";
+                                        if (userDetails['moments'].length !=
+                                            0) {
+                                          strJsonString = json
+                                              .encode(userDetails['moments']);
+                                        }
+                                        print(strJsonString);
+                                        prefs.setString(
+                                            'email', userDetails['email']);
+                                        prefs.setBool(
+                                            'isAdmin', userDetails['isAdmin']);
+                                        prefs.setStringList(
+                                            'liked',
+                                            List<String>.from(
+                                                userDetails['liked'] as List));
+                                        prefs.setString(
+                                            'moments', strJsonString);
+                                        prefs.setString('phone',
+                                            userDetails['phone'] ?? "");
+                                        prefs.setString('photoURL',
+                                            userDetails['photoURL']);
+                                        prefs.setString(
+                                            'uid', userDetails['uid']);
+                                        print("Stored");
+                                        setState(() {
+                                          showSpinner = false;
+                                        });
+                                        if (userDetails['isAdmin']) {
+                                          Navigator.of(context).push(
+                                            _createRoute(
+                                              Admindashboard(userDetails,
+                                                  widget.cameras, widget.alt),
+                                            ),
+                                          );
+                                        } else {
+                                          Navigator.of(context).pushReplacement(
+                                            _createRoute(
+                                              App(userDetails, widget.cameras,
+                                                  widget.alt),
+                                            ),
+                                          );
+                                        }
                                       } else {
                                         print("No user Found");
                                       }
-                                      setState(() {
-                                        showSpinner = false;
-                                      });
                                     } on FirebaseAuthException catch (e) {
+                                      setState(() {
+                                        loadGoogleSign = false;
+                                      });
                                       switch (e.code) {
                                         case 'invalid-email':
                                           // print("The email address is invalid.");
@@ -443,13 +549,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                   }
                                 },
                                 style: TextButton.styleFrom(
-                                    fixedSize: Size(100.0, 55.0),
+                                    fixedSize: Size(100.0, 50.0),
                                     // padding:
                                     // EdgeInsets.symmetric(vertical: 10.0),
 
-                                    backgroundColor: greenColor,
+                                    backgroundColor: showSpinner
+                                        ? greenColor.withOpacity(0.8)
+                                        : greenColor,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30.0),
+                                      borderRadius: BorderRadius.circular(12.0),
                                     )
                                     // fixedSize: Size(double.infinity, 50.0),
                                     ),
@@ -458,7 +566,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         scale: 0.7,
                                         child: CircularProgressIndicator(
                                           // value: 0.5,
-                                          color: whiteColor,
+                                          color: whiteColor.withOpacity(0.7),
                                         ),
                                       )
                                     : Text(
@@ -497,13 +605,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                   }
                                 },
                                 style: TextButton.styleFrom(
-                                    fixedSize: Size(100.0, 55.0),
+                                    fixedSize: Size(100.0, 50.0),
                                     // padding:
                                     // EdgeInsets.symmetric(vertical: 10.0),
 
-                                    backgroundColor: whiteColor,
+                                    backgroundColor: loadGoogleSign
+                                        ? whiteColor.withOpacity(0.8)
+                                        : whiteColor,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30.0),
+                                      borderRadius: BorderRadius.circular(12.0),
                                     )
                                     // fixedSize: Size(double.infinity, 50.0),
                                     ),
@@ -511,7 +621,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ? Transform.scale(
                                         scale: 0.7,
                                         child: CircularProgressIndicator(
-                                          color: Colors.grey[200],
+                                          color: greyColor,
                                         ),
                                       )
                                     : isLoaded
@@ -545,9 +655,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context).push(
+                                  Navigator.of(context).pushReplacement(
                                     _createRoute(
-                                      Registerscreen(cameras: widget.cameras),
+                                      Registerscreen(
+                                        cameras: widget.cameras,
+                                        alt: widget.alt,
+                                      ),
                                     ),
                                   );
                                 },

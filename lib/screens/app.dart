@@ -3,6 +3,10 @@ import 'dart:io';
 
 import 'package:carousel_slider/carousel_controller.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:fui_kit/fui_kit.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:turf_arena/screens/MyBookings.dart';
@@ -17,9 +21,10 @@ import 'package:turf_arena/screens/Profilescreen.dart';
 import 'package:camera/camera.dart';
 
 class App extends StatefulWidget {
-  App(this.userDetails, this.cameras);
+  App(this.userDetails, this.cameras, this.alt);
   Map userDetails;
   final List<CameraDescription> cameras;
+  final String alt;
 
   @override
   State<App> createState() => _AppState();
@@ -38,7 +43,6 @@ class _AppState extends State<App> {
   }
 
   File? _image;
-
   // Future<void> _initUniLinks() async {
   //   // Listen for incoming links
   //   _sub = uriLinkStream.listen((Uri? uri) {
@@ -111,6 +115,7 @@ class _AppState extends State<App> {
                 onDestinationSelected: (int index) {
                   setState(() {
                     currentPageIndex = index;
+
                     print(index);
                   });
                 },
@@ -124,16 +129,30 @@ class _AppState extends State<App> {
                 selectedIndex: currentPageIndex,
                 destinations: [
                   NavigationDestination(
-                    selectedIcon: Icon(
-                      Icons.home,
-                      size: 25.0,
+                    // selectedIcon: Icon(
+                    //   Icons.home,
+
+                    //   // Icons.home,
+                    //   size: 25.0,
+                    //   color: greenColor,
+                    // ),
+                    selectedIcon: FUI(
+                      SolidRounded.HOME,
+                      width: 22.0,
+                      height: 22.0,
                       color: greenColor,
                     ),
-                    icon: Icon(
-                      size: 25.0,
-                      Icons.home_outlined,
+                    icon: FUI(
+                      RegularRounded.HOME,
+                      width: 20.0,
+                      height: 20.0,
                       color: Colors.grey,
                     ),
+                    // icon: Icon(
+                    //   size: 25.0,
+                    //   Icons.home_outlined,
+                    //   color: Colors.grey,
+                    // ),
                     label: '',
                   ),
                   Padding(
@@ -141,14 +160,16 @@ class _AppState extends State<App> {
                       right: 40.0,
                     ),
                     child: NavigationDestination(
-                      selectedIcon: Icon(
-                        Icons.confirmation_number_rounded,
-                        size: 25.0,
+                      selectedIcon: FUI(
+                        SolidRounded.TICKET,
+                        width: 22.0,
+                        height: 22.0,
                         color: greenColor,
                       ),
-                      icon: Icon(
-                        size: 25.0,
-                        Icons.confirmation_number_outlined,
+                      icon: FUI(
+                        RegularRounded.TICKET,
+                        width: 20.0,
+                        height: 20.0,
                         color: Colors.grey,
                       ),
                       label: '',
@@ -162,32 +183,32 @@ class _AppState extends State<App> {
                       left: 40.0,
                     ),
                     child: NavigationDestination(
-                      selectedIcon: Icon(
-                        Icons.favorite_rounded,
-                        size: 25.0,
+                      selectedIcon: FUI(
+                        SolidRounded.HEART,
+                        width: 22.0,
+                        height: 22.0,
                         color: greenColor,
-                        // Icons.notifications,
                       ),
-                      icon: Icon(
-                        Icons.favorite_outline_outlined,
-                        size: 25.0,
-                        // Icons.notifications_outlined,
+                      icon: FUI(
+                        RegularRounded.HEART,
+                        width: 20.0,
+                        height: 20.0,
                         color: Colors.grey,
                       ),
                       label: '',
                     ),
                   ),
                   NavigationDestination(
-                    selectedIcon: Icon(
-                      Icons.account_circle,
-                      size: 25.0,
+                    selectedIcon: FUI(
+                      SolidRounded.USER,
+                      width: 22.0,
+                      height: 22.0,
                       color: greenColor,
-                      // Icons.notifications,
                     ),
-                    icon: Icon(
-                      Icons.account_circle_outlined,
-                      size: 25.0,
-                      // Icons.notifications_outlined,
+                    icon: FUI(
+                      RegularRounded.USER,
+                      width: 20.0,
+                      height: 20.0,
                       color: Colors.grey,
                     ),
                     label: '',
@@ -196,9 +217,9 @@ class _AppState extends State<App> {
               ),
             ),
             Transform.translate(
-              offset: Offset(0, -40),
+              offset: Offset(0, -25),
               child: Transform.scale(
-                scale: 1.4,
+                scale: 1.2,
                 child: GestureDetector(
                   onTap: () {
                     print("Call Camera");
@@ -212,8 +233,9 @@ class _AppState extends State<App> {
                     //     _image = File(image.path);
                     //   });
                     // }
-                    // Navigator.of(context)
-                    // .push(_createRoute(CameraApp(cameras: widget.cameras)));
+                    Navigator.of(context).push(_createRoute(CameraApp(
+                        cameras: widget.cameras,
+                        userData: widget.userDetails)));
                   },
                   child: Container(
                     // transform: Matrix4.translation(1),
@@ -222,21 +244,31 @@ class _AppState extends State<App> {
                       // border: BoxBorder.lerp(a, b, t),
                       border: Border.all(
                         color: Colors.white,
-                        width: 3.5,
+                        width: 2.5,
                       ),
-                      image: DecorationImage(
-                        fit: BoxFit.fitWidth,
-                        image: AssetImage(
-                          "images/cock.jpg",
-                        ),
+                      // image: DecorationImage(
+                      //   fit: BoxFit.fitWidth,
+                      //   image: AssetImage(
+                      //     "images/cock.jpg",
+                      //   ),
+                      // ),
+                      // color: greenColor,
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0XFF0ccda3),
+                          Color(0XFFc1fcd3),
+                        ],
+                        begin: Alignment.bottomLeft,
+                        end: Alignment.topRight,
+                        stops: [0.1, 0.6],
+                        tileMode: TileMode.repeated,
                       ),
-                      color: Colors.white,
                       borderRadius: BorderRadius.all(
                         Radius.circular(100.0),
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: secondaryColor.withOpacity(0.5),
+                          color: primaryColor.withOpacity(0.5),
                           spreadRadius: 2,
                           blurRadius: 7,
                           offset: Offset(0, 2), // changes position of shadow
@@ -246,6 +278,15 @@ class _AppState extends State<App> {
 
                     height: 60.0,
                     width: 60.0,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: FUI(
+                        SolidRounded.CAMERA,
+                        height: 50.0,
+                        color: primaryColor,
+                        // color: Color(0XFFff8c21),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -258,10 +299,10 @@ class _AppState extends State<App> {
           //     child: Text("1"),
           //   ),
           // ),
-          HomeScreen(widget.userDetails),
+          HomeScreen(widget.userDetails, widget.alt),
           MyBookings(widget.userDetails),
           TurfsList("Favorites", widget.userDetails),
-          Profilescreen(widget.userDetails)
+          Profilescreen(widget.userDetails, widget.cameras, widget.alt)
         ][currentPageIndex]);
   }
 }
@@ -359,18 +400,22 @@ class _AppState extends State<App> {
 // late List<CameraDescription> _cameras;
 
 /// CameraApp is the Main Application.
+
 class CameraApp extends StatefulWidget {
   /// Default Constructor
-  const CameraApp({super.key, required this.cameras});
+  const CameraApp({super.key, required this.cameras, required this.userData});
   final List<CameraDescription> cameras;
+  final Map userData;
 
   @override
   State<CameraApp> createState() => _CameraAppState();
 }
 
 class _CameraAppState extends State<CameraApp> {
+  // CameraController controller = CameraController(description, resolutionPreset);
   late CameraController controller;
   late XFile? imageFile;
+  bool isFront = false;
 
   void requestStoragePermission() async {
     // Check if the platform is not web, as web has no permissions
@@ -393,7 +438,9 @@ class _CameraAppState extends State<CameraApp> {
   void initState() {
     super.initState();
     requestStoragePermission();
-    controller = CameraController(widget.cameras[0], ResolutionPreset.max);
+
+    controller = CameraController(widget.cameras[0], ResolutionPreset.veryHigh);
+
     controller.initialize().then((_) {
       if (!mounted) {
         return;
@@ -411,7 +458,23 @@ class _CameraAppState extends State<CameraApp> {
         }
       }
     });
+    // initialization();
   }
+
+  // void initialization() async {
+  //   // This is where you can initialize the resources needed by your app while
+  //   // the splash screen is displayed.  Remove the following example because
+  //   // delaying the user experience is a bad design practice!
+  //   // ignore_for_file: avoid_print
+  //   print('ready in 3...');
+  //   await Future.delayed(const Duration(seconds: 1));
+  //   print('ready in 2...');
+  //   await Future.delayed(const Duration(seconds: 1));
+  //   print('ready in 1...');
+  //   await Future.delayed(const Duration(seconds: 1));
+  //   print('go!');
+  //   FlutterNativeSplash.remove();
+  // }
 
   @override
   void dispose() {
@@ -430,7 +493,7 @@ class _CameraAppState extends State<CameraApp> {
         context,
         MaterialPageRoute(
           builder: (context) =>
-              ShowMoment(File(imageFile!.path), _currentIndex),
+              ShowMoment(File(imageFile!.path), currentUrl, widget.userData),
         ),
       );
     } catch (e) {
@@ -440,14 +503,39 @@ class _CameraAppState extends State<CameraApp> {
 
   int _currentIndex = 0;
 
+  String currentUrl = "images/sticker1.png";
+
   @override
   Widget build(BuildContext context) {
+    if (!controller.value.isInitialized) {
+      print(true);
+      return Scaffold(
+        backgroundColor: primaryColor.withOpacity(0.2),
+        body: Center(
+            child: Container(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 20.0,
+            children: [
+              Icon(
+                Icons.camera,
+                size: 200.0,
+                color: whiteColor,
+              ),
+              Text(
+                "Re Play Moments",
+                style: TextStyle(
+                  color: whiteColor,
+                  fontSize: 17.0,
+                ),
+              )
+            ],
+          ),
+        )), // Show a loading indicator
+      );
+    }
     final mediaSize = MediaQuery.of(context).size;
     final scale = 1 / (controller.value.aspectRatio * mediaSize.aspectRatio);
-
-    if (!controller.value.isInitialized) {
-      return Container();
-    }
     return Scaffold(
       body: Container(
         color: primaryColor,
@@ -466,7 +554,8 @@ class _CameraAppState extends State<CameraApp> {
                       child: ClipRect(
                         clipper: _MediaSizeClipper(mediaSize),
                         child: Transform.scale(
-                          scale: scale - 0.4,
+                          scale:
+                              scale - MediaQuery.of(context).size.width / 1600,
                           alignment: Alignment.topCenter,
                           child: CameraPreview(
                             controller,
@@ -484,10 +573,13 @@ class _CameraAppState extends State<CameraApp> {
                       height: MediaQuery.of(context).size.height / 2,
                       child: Padding(
                         padding: const EdgeInsets.all(0.0),
-                        child: Image.asset(
-                          opacity: const AlwaysStoppedAnimation(.9),
-                          imgList[_currentIndex],
-                          fit: BoxFit.cover,
+                        child: Transform.scale(
+                          scale: 0.85,
+                          child: Image.asset(
+                            opacity: const AlwaysStoppedAnimation(.9),
+                            currentUrl,
+                            fit: BoxFit.fitWidth,
+                          ),
                         ),
                       ),
                     ),
@@ -499,49 +591,114 @@ class _CameraAppState extends State<CameraApp> {
               alignment: Alignment.bottomCenter,
               child: Container(
                 color: primaryColor,
-                height: 150.0,
+                height: 180.0,
                 width: double.infinity,
                 child: Center(
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: MyCarouselContainer((index) {
-                          setState(() {
-                            _currentIndex = index;
-                          });
-                        }),
-                      ),
-                      Container(
-                        // height: 75.0,
-                        // width: 30.0,
-                        decoration: BoxDecoration(
-                            color: greyColor,
-                            border: Border.all(
-                              width: 2.0,
-                              color: whiteColor,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                              30.0,
-                            )),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: FloatingActionButton(
-                            onPressed: () {
-                              _takePicture(); // Call method to take picture
-                            },
-                            child: Icon(
-                              Icons.camera,
-                              size: 35.0,
-                            ),
-                            backgroundColor: Colors.grey[100],
-                            foregroundColor: greenColor,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                              30.0,
-                            )),
-                          ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10.0,
                         ),
+                        child: MyCarouselContainer((url) {
+                          setState(() {
+                            currentUrl = url;
+                          });
+                        }, _currentIndex),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            width: 70.0,
+                          ),
+                          Center(
+                            child: Container(
+                              // height: 75.0,
+                              // width: 30.0,
+                              decoration: BoxDecoration(
+                                  color: greyColor,
+                                  border: Border.all(
+                                    width: 2.0,
+                                    color: whiteColor,
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                    30.0,
+                                  )),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: FloatingActionButton(
+                                  onPressed: () {
+                                    _takePicture(); // Call method to take picture
+                                  },
+                                  child: Icon(
+                                    Icons.camera,
+                                    size: 35.0,
+                                  ),
+                                  backgroundColor: Colors.grey[100],
+                                  foregroundColor: greenColor,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                    30.0,
+                                  )),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0,
+                                  // vertical: 5.0,
+                                ),
+                                child: Container(
+                                  child: IconButton(
+                                    onPressed: () {
+                                      // Dispose of the existing controller if it's initialized
+                                      HapticFeedback.mediumImpact();
+                                      controller?.dispose();
+                                      if (!isFront) {
+                                        setState(() {
+                                          controller = CameraController(
+                                            widget.cameras[
+                                                1], // Access the second camera directly
+                                            ResolutionPreset.veryHigh,
+                                          );
+                                          isFront = true;
+                                        });
+                                      } else {
+                                        setState(() {
+                                          controller = CameraController(
+                                            widget.cameras[
+                                                0], // Access the second camera directly
+                                            ResolutionPreset.veryHigh,
+                                          );
+                                          isFront = false;
+                                        });
+                                      }
+                                      // Initialize the controller and handle any errors
+                                      controller?.initialize().then((_) {
+                                        setState(() {});
+                                      }).catchError((e) {
+                                        print('Error initializing camera: $e');
+                                      });
+                                    },
+                                    icon: Icon(
+                                      Icons.flip_camera_ios_rounded,
+                                      color: whiteColor,
+                                      size: 25.0,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 5.0,
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -563,9 +720,10 @@ final List<String> imgList = [
 // To keep track of the current index
 
 class MyCarouselContainer extends StatefulWidget {
-  MyCarouselContainer(this.callback);
+  MyCarouselContainer(this.callback, this.currentIndex);
 
   Function callback;
+  int currentIndex;
   @override
   _MyCarouselContainerState createState() => _MyCarouselContainerState();
 }
@@ -574,6 +732,26 @@ class _MyCarouselContainerState extends State<MyCarouselContainer> {
   final CarouselSliderController _carouselController =
       CarouselSliderController();
 
+  int currentIndex = 0;
+  bool _isAnimating = false;
+
+  void _handleTap(int index) async {
+    if (_isAnimating) return; // Prevent multiple taps during animation
+    setState(() {
+      _isAnimating = true;
+    });
+    await _carouselController.animateToPage(
+      index,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+    setState(() {
+      currentIndex = index; // Update index after animation completes
+      _isAnimating = false;
+    });
+    widget.callback(imgList[index]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -581,9 +759,9 @@ class _MyCarouselContainerState extends State<MyCarouselContainer> {
         Container(
           width: double.infinity,
           // height: double.infinity,
-          height: 40.0,
+          height: 60.0,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(40.0),
+            borderRadius: BorderRadius.circular(0.0),
             // color: Colors.white,
           ),
           child: CarouselSlider(
@@ -597,21 +775,71 @@ class _MyCarouselContainerState extends State<MyCarouselContainer> {
               // //     MediaQuery.of(context).size.height,
               // enlargeCenterPage: false,
               onPageChanged: (index, reason) {
-                widget.callback(index);
+                // setState(() {
+                //   currentIndex = index;
+                // });
+                // widget.callback(imgList[index]);
+                if (!_isAnimating) {
+                  setState(() {
+                    currentIndex = index;
+                  });
+                  widget.callback(imgList[index]);
+                }
               },
             ),
-            items: imgList
-                .map((item) => Container(
-                      height: 35.0,
-                      width: 35.0,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage(item),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ))
-                .toList(),
+            items: imgList.asMap().entries.map((entry) {
+              int index = entry.key;
+              String item = entry.value;
+              return GestureDetector(
+                onTap: () => _handleTap(index),
+                // onTap: () {
+                //   setState(() {
+                //     currentIndex = index;
+                //   });
+                //   _carouselController.animateToPage(
+                //     index,
+                //     duration: Duration(milliseconds: 500), // Animation duration
+                //     curve: Curves.easeInOut,
+                //   );
+                //   widget.callback(item);
+                // },
+                child: Container(
+                  height: currentIndex == index ? 58.0 : 25.0,
+                  width: currentIndex == index ? 50.0 : 25.0,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(item),
+                      fit:
+                          currentIndex == index ? BoxFit.cover : BoxFit.contain,
+                    ),
+                    border: Border.all(
+                      color: currentIndex == index
+                          ? Colors.white
+                          : Colors.transparent,
+                      width: 1.5,
+                    ),
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                ),
+              );
+            }).toList(),
+            // items: imgList
+            //     .map((item) => GestureDetector(
+            //           onTap: () {
+            //             widget.callback();
+            //           },
+            //           child: Container(
+            //             height: 35.0,
+            //             width: 35.0,
+            //             decoration: BoxDecoration(
+            //               image: DecorationImage(
+            //                 image: AssetImage(item),
+            //                 fit: BoxFit.cover,
+            //               ),
+            //             ),
+            //           ),
+            //         ))
+            //     .toList(),
           ),
         ),
       ],

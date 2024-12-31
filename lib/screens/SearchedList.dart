@@ -91,6 +91,7 @@ class _SearchedlistState extends State<Searchedlist> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: whiteColor,
       body: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 20.0,
@@ -271,9 +272,11 @@ class TurfTile extends StatelessWidget {
                     // width: 150.0,
                     height: 150.0,
                     fit: BoxFit.cover,
-                    image: AssetImage(
-                      "images/cricket.png",
-                    ),
+                    image: details['imgList'] == null
+                        ? AssetImage(
+                            "images/turf_img.jpg",
+                          )
+                        : NetworkImage(details['imgList'][0]),
                   ),
                 ),
                 Container(

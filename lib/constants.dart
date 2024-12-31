@@ -51,7 +51,7 @@ const kLoginFieldDecoration = InputDecoration(
   hintStyle: TextStyle(
     color: Color.fromRGBO(117, 117, 117, 1),
   ),
-  contentPadding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 20.0),
+  contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
   border: OutlineInputBorder(
     borderRadius: BorderRadius.all(Radius.circular(16.0)),
   ),
@@ -84,13 +84,14 @@ const kOtpDecoration = InputDecoration(
     borderRadius: BorderRadius.all(Radius.circular(2.0)),
   ),
   enabledBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: primaryColor, width: 2.0),
+    borderSide: BorderSide(color: greyColor, width: 2.0),
     borderRadius: BorderRadius.all(Radius.circular(5.0)),
   ),
   focusedBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: primaryColor, width: 4.0),
+    borderSide: BorderSide(color: greyColor, width: 3.0),
     borderRadius: BorderRadius.all(Radius.circular(5.0)),
   ),
-  fillColor: greyColor,
+  fillColor: Color.fromRGBO(238, 238, 238, 1),
+  counterText: '',
   filled: true,
 );

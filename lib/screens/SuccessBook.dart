@@ -17,7 +17,10 @@ class SuccessfullyBooked extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image(
-                    image: AssetImage("images/logo.png"),
+                    image: AssetImage(
+                      "images/app_icon.png",
+                    ),
+                    height: 50.0,
                   ),
                 ],
               ),
@@ -53,7 +56,7 @@ class SuccessfullyBooked extends StatelessWidget {
                           "Successfully Booked",
                           style: TextStyle(
                             color: whiteColor,
-                            fontSize: 35.0,
+                            fontSize: 20.0,
                             fontWeight: FontWeight.w600,
                           ),
                           textAlign: TextAlign.center,

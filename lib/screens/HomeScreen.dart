@@ -1,9 +1,12 @@
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:turf_arena/screens/BookingScreen.dart';
 import 'package:turf_arena/screens/IndividualTurf.dart';
+import 'package:turf_arena/screens/NearbyList.dart';
 import 'package:turf_arena/screens/TurfsList.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +15,9 @@ import 'components/ProfileHeader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen(this.userDetails);
+  HomeScreen(this.userDetails, this.alt);
   Map userDetails;
+  String alt;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -38,184 +42,96 @@ Route _createRoute(Widget ScreenName) {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Map respData = {
-    "html_attributions": [],
-    "results": [
-      {
-        "business_status": "OPERATIONAL",
-        "geometry": {
-          "location": {"lat": 10.7576557, "lng": 79.11217499999999},
-          "viewport": {
-            "northeast": {"lat": 10.75903437989272, "lng": 79.11356962989272},
-            "southwest": {"lat": 10.75633472010728, "lng": 79.11086997010729}
-          }
-        },
-        "icon":
-            "https://maps.gstatic.com/mapfiles/place_api/icons/v1/png_71/generic_business-71.png",
-        "icon_background_color": "#7B9EB0",
-        "icon_mask_base_uri":
-            "https://maps.gstatic.com/mapfiles/place_api/icons/v2/generic_pinlet",
-        "name": "Power Smack Turf",
-        "photos": [
-          {
-            "height": 4032,
-            "html_attributions": [
-              "<a href=\"https://maps.google.com/maps/contrib/107776269615430639692\">Sa ba</a>"
-            ],
-            "photo_reference":
-                "AdDdOWrKCSi8evabGZeLgarKzb74RYsgTPzycQMfEfNti5_sqPkJ77qp-fEzL1ak2MTnbcIVwfhYAt1z2YXw6_uoiGlWHPgO8CNODpM3d7VtgUAxcfuR52g-uDNexiF4brAGUDziFb7XM2_Fv2NQPtcIMHX4V1HZ7iN-8un3YnAtymmRs5LG",
-            "width": 3024
-          }
-        ],
-        "place_id": "ChIJVz-qaAC5qjsRIxDshxRiQC4",
-        "plus_code": {
-          "compound_code": "Q456+3V Thanjavur, Tamil Nadu",
-          "global_code": "7J2XQ456+3V"
-        },
-        "rating": 2.6,
-        "reference": "ChIJVz-qaAC5qjsRIxDshxRiQC4",
-        "scope": "GOOGLE",
-        "types": ["point_of_interest", "establishment"],
-        "user_ratings_total": 7,
-        "vicinity":
-            "Serfoji ground backside, Indra Nagar main road, Devan Nagar 1st St, near power Smack Gym, opposite to Mother MIRA school, Thanjavur"
-      },
-      {
-        "business_status": "OPERATIONAL",
-        "geometry": {
-          "location": {"lat": 10.7824672, "lng": 79.1020084},
-          "viewport": {
-            "northeast": {"lat": 10.78388007989272, "lng": 79.10333197989272},
-            "southwest": {"lat": 10.78118042010728, "lng": 79.10063232010728}
-          }
-        },
-        "icon":
-            "https://maps.gstatic.com/mapfiles/place_api/icons/v1/png_71/generic_business-71.png",
-        "icon_background_color": "#7B9EB0",
-        "icon_mask_base_uri":
-            "https://maps.gstatic.com/mapfiles/place_api/icons/v2/generic_pinlet",
-        "name": "Vinyaka Sports Club",
-        "opening_hours": {},
-        "photos": [
-          {
-            "height": 3024,
-            "html_attributions": [
-              "<a href=\"https://maps.google.com/maps/contrib/103715711055695403623\">THANJAI THAMILAN</a>"
-            ],
-            "photo_reference":
-                "AdDdOWr52M9Rao2H1Kby8Il-UMpId82D--ypXq-mrVp9n8NFtJyhD4zXhT3376Oc6zylxrxx3iSl2khwvzQIy7iGahbxSLCqu-gz-eu5SyyoD35TEF5xPTUg278T7kKk2-QAplnkci9iTWXc4Oa1qepodHCuoePlu_FqP8tHZqSlzmxuA1aI",
-            "width": 4032
-          }
-        ],
-        "place_id": "ChIJ-Q54d5O_qjsR88xKd15v6mk",
-        "rating": 3.8,
-        "reference": "ChIJ-Q54d5O_qjsR88xKd15v6mk",
-        "scope": "GOOGLE",
-        "types": ["point_of_interest", "establishment"],
-        "user_ratings_total": 9,
-        "vicinity": "Q4J2+XRJ, Sundram Nagar, Thanjavur"
-      },
-      {
-        "business_status": "OPERATIONAL",
-        "geometry": {
-          "location": {"lat": 10.754707, "lng": 79.1132502},
-          "viewport": {
-            "northeast": {"lat": 10.75642412989272, "lng": 79.11425152989271},
-            "southwest": {"lat": 10.75372447010728, "lng": 79.11155187010728}
-          }
-        },
-        "icon":
-            "https://maps.gstatic.com/mapfiles/place_api/icons/v1/png_71/generic_business-71.png",
-        "icon_background_color": "#7B9EB0",
-        "icon_mask_base_uri":
-            "https://maps.gstatic.com/mapfiles/place_api/icons/v2/generic_pinlet",
-        "name": "Rajah Serfoji Ground",
-        "photos": [
-          {
-            "height": 3551,
-            "html_attributions": [
-              "<a href=\"https://maps.google.com/maps/contrib/101974870093925708792\">A Google User</a>"
-            ],
-            "photo_reference":
-                "AdDdOWp6WZhlNjduambXmJvXQMUMz4kgAmHrvpejtuLxHVi8rWAO0QO5ryFPHXA_kx3p7Z1qB_ycBeLVXiO4DndTSbY8ej-k4gpV8tYwtudBIQs7wM6jNwJSZdDK17D3HyCMw48_JWeeyGffBa0cwBsg4sgpfneKOheOAZqhGxJodQtNmYDj",
-            "width": 2590
-          }
-        ],
-        "place_id": "ChIJr6GuFXu5qjsRo6CCLxkEfuI",
-        "rating": 4.5,
-        "reference": "ChIJr6GuFXu5qjsRo6CCLxkEfuI",
-        "scope": "GOOGLE",
-        "types": ["point_of_interest", "establishment"],
-        "user_ratings_total": 2,
-        "vicinity": "Q437+V8J, AVP Azhagammal Nagar, Thanjavur"
-      },
-      {
-        "business_status": "OPERATIONAL",
-        "geometry": {
-          "location": {"lat": 10.7574897, "lng": 79.1120679},
-          "viewport": {
-            "northeast": {"lat": 10.75883747989272, "lng": 79.11341477989272},
-            "southwest": {"lat": 10.75613782010728, "lng": 79.11071512010727}
-          }
-        },
-        "icon":
-            "https://maps.gstatic.com/mapfiles/place_api/icons/v1/png_71/generic_business-71.png",
-        "icon_background_color": "#7B9EB0",
-        "icon_mask_base_uri":
-            "https://maps.gstatic.com/mapfiles/place_api/icons/v2/generic_pinlet",
-        "name": "VelTam",
-        "opening_hours": {"open_now": true},
-        "photos": [
-          {
-            "height": 4640,
-            "html_attributions": [
-              "<a href=\"https://maps.google.com/maps/contrib/112097577530498879180\">karthik</a>"
-            ],
-            "photo_reference":
-                "AdDdOWpAYnvZfiC48bk_wm19o794Sd3tDlXfe-1uSnwUJow4jcxIf1ltOdAfbIH3kwVO94gzl_b3hHVSv2mzBR6u7w6YkLZOeS0DDgtpqY9I1pYNZ-z30p8qk-vtf9hvMLiDGkR80KCvOfTPZN2lHJYep0k9zg8bfL9lOO1luVJheCnagmYf",
-            "width": 3472
-          }
-        ],
-        "place_id": "ChIJuezpxga5qjsRYwWkEOFLLAM",
-        "plus_code": {
-          "compound_code": "Q456+2V Thanjavur, Tamil Nadu",
-          "global_code": "7J2XQ456+2V"
-        },
-        "rating": 4.5,
-        "reference": "ChIJuezpxga5qjsRYwWkEOFLLAM",
-        "scope": "GOOGLE",
-        "types": ["point_of_interest", "establishment"],
-        "user_ratings_total": 37,
-        "vicinity": "No75 Rajagopal Moopanar Colony, Indira Nagar, Thanjavur"
+  late Map respData;
+
+  late double latitude;
+  late double longitude;
+
+  void getLocationData() async {
+    await getNearby();
+  }
+
+  List<String> names = [];
+
+  Future<void> getNearby() async {
+    print("calling nearby");
+
+    try {
+      print(widget.alt);
+      HttpsCallable callable =
+          FirebaseFunctions.instance.httpsCallable("getNearby");
+      dynamic response = await callable.call({
+        // 'alt': "10.897774, 79.022481",
+        'alt': widget.alt,
+      });
+      print(response.data);
+      print(response.data['results'].length);
+      if (response.data['results'].length > 0) {
+        setState(() {
+          respData = response.data;
+          loadingNearby = false;
+        });
+        print(respData);
+        print(respData['results'].length);
+      } else {
+        setState(() {
+          isEmpty = true;
+          loadingNearby = false;
+        });
       }
-    ],
-    "status": "OK"
-  };
+
+      !isEmpty ? getNearbyTurfs() : null;
+    } on FirebaseFunctionsException catch (e) {
+      // Do clever things with e
+      print(e.toString());
+      setState(() {
+        // paymentData = resp.data;
+        loadingNearby = false;
+      });
+    } catch (e) {
+      // Do other things that might be thrown that I have overlooked
+      print(e.toString());
+      setState(() {
+        // paymentData = resp.data;
+        loadingData = false;
+      });
+    }
+  }
 
   void getNearbyTurfs() {
-    print("calling");
+    // print("calling");
     // print(respData["results"][0]['name']);
     // respData['results'].map((item) {
     //   print(item);
     // });
-    List<String> names = [];
-    for (int i = 0; i < respData.length; i++) {
+    names = [];
+    print(respData.length);
+    for (int i = 0; i < respData['results'].length; i++) {
       print(respData['results'][i]['name']);
       names.add(respData['results'][i]['name']);
     }
+    print(names);
+    print(names.length);
     _loadMoreData(names);
-    // respData['results'].map((result) => {print(result)});
   }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    getNearbyTurfs();
+    getLocationData();
   }
 
   List<Map<String, dynamic>> nearbyList = [];
   List<Map<String, dynamic>> courtsList = [
+    {
+      'name': 'Cricket',
+      'src': "images/cricket.png",
+    },
+    {
+      'name': 'Football',
+      'src': "images/football.png",
+    },
     {
       'name': 'Badminton',
       'src': "images/badminton_court.jpg",
@@ -225,17 +141,15 @@ class _HomeScreenState extends State<HomeScreen> {
       'src': "images/tennis_court.jpg",
     },
     {
-      'name': 'Football',
-      'src': "images/football.png",
-    },
-    {
       'name': 'Other Turfs',
       'src': "images/turf_img.jpg",
     },
   ];
 
+  bool loadingNearby = true;
   bool loadingData = true;
   bool isEmpty = false;
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   // List<DocumentSnapshot> _documents = [];
   bool _isLoading = false;
@@ -244,7 +158,8 @@ class _HomeScreenState extends State<HomeScreen> {
   DocumentSnapshot? _lastDocument; // To keep track of the last fetched document
   late ScrollController _scrollController = ScrollController();
 
-  Future<void> fetchBookings(List names) async {
+  Future<void> fetchNearby(List names) async {
+    print(names);
     CollectionReference turfs = FirebaseFirestore.instance.collection('turfs');
 
     Query query = turfs.where('name', whereIn: names).limit(4);
@@ -263,6 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // // }
 
       // _lastDocument = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+      print(snapshot.docs);
       if (snapshot.docs.length == 0) {
         setState(() {
           loadingData = false;
@@ -290,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _isLoading = true;
     });
 
-    await fetchBookings(names); // Your existing data fetch method
+    await fetchNearby(names); // Your existing data fetch method
 
     setState(() {
       _isLoading = false;
@@ -463,12 +379,29 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ),
                                       GestureDetector(
-                                        onTap: () {},
+                                        onTap: () {
+                                          loadingNearby
+                                              ? null
+                                              : isEmpty
+                                                  ? null
+                                                  : Navigator.of(context).push(
+                                                      _createRoute(
+                                                        Nearbylist(
+                                                          names,
+                                                          widget.userDetails,
+                                                        ),
+                                                      ),
+                                                    );
+                                        },
                                         child: Text(
                                           "See All",
                                           style: TextStyle(
-                                            color: greenColor,
-                                            fontSize: 15.0,
+                                            color: loadingNearby
+                                                ? greyColor
+                                                : isEmpty
+                                                    ? greyColor
+                                                    : greenColor,
+                                            fontSize: 14.0,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
@@ -478,30 +411,81 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                               Expanded(
-                                child: ListView.builder(
-                                  // controller: _scrollController,
-                                  scrollDirection: Axis.horizontal,
-                                  physics: AlwaysScrollableScrollPhysics(),
-                                  itemCount: _isLoading
-                                      ? nearbyList.length + 1
-                                      : nearbyList.length,
-                                  itemBuilder: (context, index) {
-                                    if (index < nearbyList.length) {
-                                      // Replace with your booking item widget
-                                      return NearbyTile(nearbyList[index],
-                                          widget.userDetails);
-                                    } else if (_isLoading) {
-                                      return Skeletonizer(
-                                        enabled: true,
-                                        enableSwitchAnimation: true,
-                                        child: SportsTile({
-                                          'name': "Lorem Ipsum",
-                                          'src': 'images/turf_img.jpg',
-                                        }, widget.userDetails),
-                                      );
-                                    }
-                                  },
-                                ),
+                                child: loadingNearby
+                                    ? SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          children: [
+                                            Skeletonizer(
+                                              enabled: true,
+                                              enableSwitchAnimation: true,
+                                              child: NearbyTile({
+                                                'name': "Lorem Ipsum",
+                                                'src': 'images/turf_img.jpg',
+                                              }, widget.userDetails),
+                                            ),
+                                            Skeletonizer(
+                                              enabled: true,
+                                              enableSwitchAnimation: true,
+                                              child: NearbyTile({
+                                                'name': "Lorem Ipsum",
+                                                'src': 'images/turf_img.jpg',
+                                              }, widget.userDetails),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    : isEmpty
+                                        ? Container(
+                                            height: 150.0,
+                                            width: double.infinity,
+                                            child: Column(
+                                              children: [
+                                                Expanded(
+                                                  flex: 3,
+                                                  child: Image.asset(
+                                                    "images/noturfs.gif",
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  flex: 1,
+                                                  child: Text(
+                                                    "No nearby turfs found.",
+                                                    style: TextStyle(
+                                                      color: primaryColor,
+                                                      fontSize: 16.0,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                        : ListView.builder(
+                                            // controller: _scrollController,
+                                            scrollDirection: Axis.horizontal,
+                                            physics:
+                                                AlwaysScrollableScrollPhysics(),
+                                            itemCount: loadingNearby
+                                                ? nearbyList.length + 1
+                                                : nearbyList.length,
+                                            itemBuilder: (context, index) {
+                                              // if (index < nearbyList.length) {
+                                              //   // Replace with your booking item widget
+                                              return NearbyTile(
+                                                  nearbyList[index],
+                                                  widget.userDetails);
+                                              // } else if (loadingNearby) {
+                                              //   return Skeletonizer(
+                                              //     enabled: true,
+                                              //     enableSwitchAnimation: true,
+                                              //     child: NearbyTile({
+                                              //       'name': "Lorem Ipsum",
+                                              //       'src': 'images/turf_img.jpg',
+                                              //     }, widget.userDetails),
+                                              //   );
+                                              // }
+                                            },
+                                          ),
                               ),
                             ],
                           ),
@@ -716,18 +700,41 @@ class NearbyTile extends StatelessWidget {
                   image: DecorationImage(
                     fit: BoxFit.cover,
                     // image: AssetImage(turfDetails['src']),
-                    image: turfDetails['src'] == null
+                    image: turfDetails['imgList'] == null
                         ? AssetImage(
                             "images/turf_img.jpg",
                           )
-                        : AssetImage(
-                            turfDetails['src'],
-                          ),
+                        : Image.network(
+                            turfDetails['imgList'][0],
+                            loadingBuilder: (BuildContext context, Widget child,
+                                ImageChunkEvent? loadingProgress) {
+                              if (loadingProgress == null) {
+                                return child; // Image is fully loaded
+                              }
+                              return Skeletonizer(
+                                enabled: true,
+                                enableSwitchAnimation: true,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16.0),
+                                  child: Container(
+                                    height: double.maxFinite,
+                                    width: 160.0,
+                                    color: greyColor,
+                                  ),
+                                ),
+                              );
+                            },
+                            errorBuilder: (BuildContext context, Object error,
+                                StackTrace? stackTrace) {
+                              return Icon(Icons.error,
+                                  color: Colors.red, size: 50);
+                            },
+                          ).image,
                   ),
                 ),
               ),
               Align(
-                alignment: Alignment.bottomCenter,
+                alignment: Alignment.bottomLeft,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ClipRRect(

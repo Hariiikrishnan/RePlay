@@ -10,6 +10,16 @@ class ProfileHeader extends StatelessWidget {
   Color txtColor;
   // User? user = userDetails.user;
 
+  String capitalize(String? text) {
+    if (text == null || text.isEmpty) {
+      return text!; // Return as is if the string is null or empty
+    }
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -47,7 +57,8 @@ class ProfileHeader extends StatelessWidget {
               ),
             ),
             Text(
-              (userDetails['displayName'] ?? userDetails['email'] ?? ""),
+              capitalize(
+                  (userDetails['displayName'] ?? userDetails['email'] ?? "")),
               style: TextStyle(
                 color: txtColor,
                 // color: greenColor.withOpacity(0.7),

@@ -98,11 +98,19 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                 30.0,
               ),
             ),
-            padding: EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 20.0,
+            margin: EdgeInsets.symmetric(
+              horizontal: 5.0,
+              vertical: 5.0,
             ),
+            padding: EdgeInsets.symmetric(
+              horizontal: 30.0,
+              vertical: 5.0,
+            ),
+            elevation: 50.0,
+            behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.red[400],
+            showCloseIcon: true,
+            closeIconColor: whiteColor,
             content: Text(
               "Error Occured. Try Again!",
               style: TextStyle(
@@ -118,14 +126,16 @@ class _VerifyPhoneState extends State<VerifyPhone> {
           showSpinner = false;
         });
         print("Code sent to phone number.");
-        // Navigator.of(context).pushReplacement(_createRoute(
-        //   Otpscreen(
-        //     verificationId: verificationId,
-        //     userData: widget.userData,
-        //     phoneNo: phoneController.text,
-        //     // url: downloadUrl,
-        //   ),
-        // ));
+        Navigator.of(context).pushReplacement(_createRoute(
+          Otpscreen(
+            verificationId: verificationId,
+            userData: widget.userData,
+            phoneNo: phoneController.text,
+            cameras: [],
+            alt: "",
+            // url: downloadUrl,
+          ),
+        ));
       },
       codeAutoRetrievalTimeout: (String verificationId) {
         setState(() {

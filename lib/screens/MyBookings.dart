@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:turf_arena/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:turf_arena/screens/TicketScreen.dart';
+import 'package:turf_arena/screens/UpcomingList.dart';
 import 'package:turf_arena/screens/components/ProfileHeader.dart';
 
 class MyBookings extends StatefulWidget {
@@ -104,6 +106,7 @@ class _MyBookingsState extends State<MyBookings> {
         .orderBy('date')
         .limit(1);
 
+    Map temp;
     try {
       QuerySnapshot snapshot = await query.get();
 
@@ -115,7 +118,11 @@ class _MyBookingsState extends State<MyBookings> {
 
       setState(() {
         snapshot.docs.forEach((doc) {
-          upcomingList.add(doc.data() as Map<String, dynamic>);
+          temp = doc.data() as Map<String, dynamic>;
+          temp['id'] = doc.id;
+          print(doc.id);
+          upcomingList.add(temp as Map<String, dynamic>);
+          // upcomingList.add(doc.data() as Map<String, dynamic>);
         });
         loadUpcoming = false;
 
@@ -140,7 +147,7 @@ class _MyBookingsState extends State<MyBookings> {
     if (_lastDocument != null) {
       query = query.startAfterDocument(_lastDocument!);
     }
-
+    Map temp;
     try {
       QuerySnapshot snapshot = await query.get();
       print(snapshot.docs.isEmpty);
@@ -158,7 +165,10 @@ class _MyBookingsState extends State<MyBookings> {
 
       setState(() {
         snapshot.docs.forEach((doc) {
-          pastList.add(doc.data() as Map<String, dynamic>);
+          temp = doc.data() as Map<String, dynamic>;
+          temp['id'] = doc.id;
+          print(doc.id);
+          pastList.add(temp as Map<String, dynamic>);
         });
         // loadingdata = false;
       });
@@ -328,11 +338,19 @@ class _MyBookingsState extends State<MyBookings> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              isUpcomingEmpty
+                                  ? null
+                                  : Navigator.of(context).push(
+                                      _createRoute(
+                                        UpcomingList(widget.details),
+                                      ),
+                                    );
+                            },
                             child: Text(
                               "See All",
                               style: TextStyle(
-                                color: greenColor,
+                                color: isUpcomingEmpty ? greyColor : greenColor,
                                 fontSize: 15.0,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -347,18 +365,50 @@ class _MyBookingsState extends State<MyBookings> {
                           ? Skeletonizer(
                               enabled: true,
                               enableSwitchAnimation: true,
-                              child: BookingWidget({
+                              child: UpcomingBookingTile({
                                 'turfName': "Lorem Ipsum",
-                                'date': '00-00-00',
+                                'date': Timestamp.now(),
                                 'bookedTime': "",
                                 "from": "7 AM",
                                 "to": "8 AM",
-                              }, Color.fromARGB(232, 215, 214, 214)),
+                              }),
                             )
                           : isUpcomingEmpty
-                              ? Container(
-                                  child: Text(
-                                    "Book Something!",
+                              ? Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: 8.0,
+                                    horizontal: 25.0,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        spacing: 10.0,
+                                        children: [
+                                          Text(
+                                            "Oops!",
+                                            style: TextStyle(
+                                              color: Colors.grey[400],
+                                              fontSize: 45.0,
+                                              fontWeight: FontWeight.w900,
+                                            ),
+                                          ),
+                                          Icon(
+                                            Icons.search_off_rounded,
+                                            color: Colors.grey[400],
+                                            size: 45.0,
+                                          )
+                                        ],
+                                      ),
+                                      Text(
+                                        "No upcoming bookings,book and play!",
+                                        style: TextStyle(
+                                          color: primaryColor,
+                                          fontSize: 15.0,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 )
                               : UpcomingBookingTile(upcomingList[0]),
@@ -400,7 +450,7 @@ class _MyBookingsState extends State<MyBookings> {
                                         'bookedTime': "",
                                         "from": "7 AM",
                                         "to": "8 AM",
-                                      }, Color.fromARGB(232, 215, 214, 214)),
+                                      }, Colors.white),
                                     );
                                   }
                                 },
@@ -431,24 +481,23 @@ class NoBookings extends StatelessWidget {
           children: [
             Icon(
               Icons.sentiment_dissatisfied_rounded,
-              color: primaryColor,
+              color: Colors.grey[400],
               size: 120.0,
             ),
+            //  FUI(
+            //   RegularRounded.SAD,
+            //   color: primaryColor,
+            //   height: 150.0,
+            //   width: 150.0,
+            // ),
             SizedBox(
-              height: 30.0,
+              height: 20.0,
             ),
             Text(
-              'No Bookings Found.',
+              'No past bookings,fun missed!',
               style: TextStyle(
                 color: primaryColor,
-                fontSize: 18.0,
-              ),
-            ),
-            Text(
-              'Book Your Turfs Now!',
-              style: TextStyle(
-                color: primaryColor,
-                fontSize: 18.0,
+                fontSize: 16.0,
               ),
             ),
           ],
@@ -479,14 +528,22 @@ class BookingWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
         vertical: 7.0,
       ),
-      child: Container(
-        // height: 170.0,
-        decoration: BoxDecoration(
-            color: Colors.grey[200],
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(
+            _createRoute(
+              Ticketscreen(details),
+            ),
+          );
+        },
+        child: Container(
+          // height: 170.0,
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 82, 213, 182).withOpacity(0.6),
             // gradient: LinearGradient(
             //   colors: [
             //     Colors.grey[200]!.withOpacity(1),
-            //     whiteColor.withOpacity(1.0)
+            //     const Color.fromARGB(255, 82, 213, 182).withOpacity(0.6),
             //   ],
             //   begin: Alignment.bottomLeft,
             //   end: Alignment.topRight,
@@ -495,148 +552,378 @@ class BookingWidget extends StatelessWidget {
             // ),
             borderRadius: BorderRadius.circular(
               16.0,
-            )),
-        child: Row(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Container(
-                  height: 25.0,
-                  width: 15.0,
-                  decoration: BoxDecoration(
-                      color: whiteColor,
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(50.0),
-                        bottomRight: Radius.circular(50.0),
-                      )),
-                ),
-                SizedBox(
-                  height: 30.0,
-                ),
-                Container(
-                  height: 25.0,
-                  width: 15.0,
-                  decoration: BoxDecoration(
-                      color: whiteColor,
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(50.0),
-                        bottomRight: Radius.circular(50.0),
-                      )),
-                ),
-              ],
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 15.0,
-                  vertical: 20.0,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text(
-                      "Turf Booked : " + capitalize(details['turfName']),
-                      style: TextStyle(
-                        color: primaryColor,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w600,
+            // boxShadow: [
+            //   BoxShadow(
+            //     color: greyColor.withOpacity(0.3),
+            //     spreadRadius: 2,
+            //     blurRadius: 15,
+            //     offset: Offset(2, -5), // changes position of shadow
+            //   ),
+            // ],
+            boxShadow: [
+              // const BoxShadow(
+              //   color: Color.fromRGBO(203, 203, 203, 1),
+              //   spreadRadius: 1.0,
+              //   blurRadius: 0.0,
+              // ),
+              // const BoxShadow(
+              //   color: whiteColor,
+              //   spreadRadius: 1.0,
+              //   blurRadius: 2.0,
+              //   offset: Offset(0, 3),
+              // ),
+              // const BoxShadow(
+              //   color: Color.fromRGBO(203, 203, 203, 1),
+              //   spreadRadius: 1.0,
+              //   blurRadius: 0.0,
+              // ),
+              // const BoxShadow(
+              //   color: whiteColor,
+              //   spreadRadius: 1.0,
+              //   blurRadius: 2.0,
+              //   offset: Offset(0, -3),
+              // ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Container(
+                    height: 25.0,
+                    width: 15.0,
+                    decoration: BoxDecoration(
+                        color: whiteColor,
+                        // boxShadow: [
+                        //   const BoxShadow(
+                        //     color: greyColor,
+                        //     spreadRadius: 1.0,
+                        //     blurRadius: 1.0,
+                        //   ),
+                        //   const BoxShadow(
+                        //     color: whiteColor,
+                        //     spreadRadius: 2.0,
+                        //     blurRadius: 3.0,
+                        //     offset: Offset(-2, 0),
+                        //   ),
+                        // ],
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(50.0),
+                          bottomRight: Radius.circular(50.0),
+                        )),
+                  ),
+                  SizedBox(
+                    height: 30.0,
+                  ),
+                  Container(
+                    height: 25.0,
+                    width: 15.0,
+                    decoration: BoxDecoration(
+                        color: whiteColor,
+                        // boxShadow: [
+                        //   const BoxShadow(
+                        //     color: greyColor,
+                        //     spreadRadius: 1.0,
+                        //     blurRadius: 1.0,
+                        //   ),
+                        //   const BoxShadow(
+                        //     color: whiteColor,
+                        //     spreadRadius: 2.0,
+                        //     blurRadius: 3.0,
+                        //     offset: Offset(-2, 0),
+                        //   ),
+                        // ],
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(50.0),
+                          bottomRight: Radius.circular(50.0),
+                        )),
+                  ),
+                ],
+              ),
+              Expanded(
+                child: IntrinsicHeight(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 5,
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            left: 10.0,
+                            right: 3.0,
+                            top: 20.0,
+                            bottom: 20.0,
+                          ),
+                          child: Column(
+                            spacing: 2.0,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Text(
+                                "Turf Booked",
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                "To Play at",
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                "Time",
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                "Booked at",
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                "Amount Paid",
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                    details['bookedTime'].runtimeType == String
-                        ? Text(
-                            "To Play at :  details['date']",
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontSize: 14.0,
-                            ),
-                          )
-                        : Text(
-                            "To Play at : " +
-                                details['date']
-                                    .toDate()
-                                    .toString()
-                                    .substring(0, 16),
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontSize: 14.0,
+                      // VerticalDivider(
+                      //   color: whiteColor,
+                      //   thickness: 3.0,
+                      //   width: 5.0,
+                      //   // indent: 10.0,
+                      //   // endIndent: 10.0,
+                      // ),
+                      Expanded(
+                        flex: 1,
+                        child: Container(
+                          // width: 2.0,
+                          // height: 150.0, // Adjust this to your desired height
+                          decoration: BoxDecoration(
+                            border: Border(
+                                // right: BorderSide(
+                                //   color: Colors.grey[200]!,
+                                //   width: 2.0,
+                                //   style: BorderStyle
+                                //       .solid, // This is the trick to dashed effect
+                                // ),
+                                ),
+                          ),
+                          child: Column(
+                            children: List.generate(
+                              10, // Number of dots
+                              (index) => Expanded(
+                                flex: 1,
+                                child: Container(
+                                  width: 3.0,
+                                  // height: 15.0,
+                                  margin: index == 9
+                                      ? EdgeInsets.only(bottom: 6.0)
+                                      : EdgeInsets.only(bottom: 8.0),
+                                  color: whiteColor,
+                                ),
+                              ),
                             ),
                           ),
-                    Text(
-                      "Time : " +
-                          " From " +
-                          details['from'] +
-                          " to " +
-                          details['to'],
-                      style: TextStyle(
-                        color: primaryColor,
-                        fontSize: 14.0,
+                        ),
                       ),
-                    ),
-                    details['bookedTime'].runtimeType == String
-                        ? Text(
-                            "Booked at : details['bookedTime']",
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontSize: 14.0,
-                            ),
-                          )
-                        : Text(
-                            "Booked at : " +
-                                details['bookedTime']
-                                    .toDate()
-                                    .toString()
-                                    .substring(0, 16),
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontSize: 14.0,
-                            ),
+                      Expanded(
+                        flex: 7,
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            right: 10.0,
+                            left: 3.0,
+                            top: 20.0,
+                            bottom: 20.0,
                           ),
-                    Text(
-                      "Amount Paid : Rs.1200",
-                      style: TextStyle(
-                        color: primaryColor,
-                        fontSize: 14.0,
+                          child: Column(
+                            spacing: 2.0,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Text(
+                                capitalize(details['turfName']),
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              details['bookedTime'].runtimeType == String
+                                  ? Text(
+                                      "details['date']",
+                                      style: TextStyle(
+                                        color: primaryColor,
+                                        fontSize: 14.0,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    )
+                                  : Text(
+                                      DateFormat('MMM d').format(
+                                        DateTime.parse(details['date']
+                                            .toDate()
+                                            .toString()),
+                                      ),
+                                      style: TextStyle(
+                                        color: primaryColor,
+                                        fontSize: 14.0,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                              Text(
+                                details['from'] + " - " + details['to'],
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14.0,
+                                ),
+                              ),
+                              details['bookedTime'].runtimeType == String
+                                  ? Text(
+                                      "details['bookedTime']",
+                                      style: TextStyle(
+                                        color: primaryColor,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14.0,
+                                      ),
+                                    )
+                                  : Text(
+                                      DateFormat('d MMM, hh:mm a').format(
+                                        DateTime.parse(details['bookedTime']
+                                            .toDate()
+                                            .toString()),
+                                      ),
+                                      style: TextStyle(
+                                        color: primaryColor,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14.0,
+                                      ),
+                                    ),
+                              Text(
+                                "₹ " + details['amount'].toString(),
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Container(
-                  height: 25.0,
-                  width: 15.0,
-                  decoration: BoxDecoration(
-                      color: whiteColor,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(50.0),
-                        bottomLeft: Radius.circular(50.0),
-                      )),
-                ),
-                SizedBox(
-                  height: 30.0,
-                ),
-                Container(
-                  height: 25.0,
-                  width: 15.0,
-                  decoration: BoxDecoration(
-                      color: whiteColor,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(50.0),
-                        bottomLeft: Radius.circular(50.0),
-                      )),
-                ),
-              ],
-            ),
-          ],
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Container(
+                    height: 25.0,
+                    width: 15.0,
+                    decoration: BoxDecoration(
+                        color: whiteColor,
+                        // boxShadow: [
+                        //   const BoxShadow(
+                        //     color: greyColor,
+                        //     spreadRadius: 1.0,
+                        //     blurRadius: 1.0,
+                        //   ),
+                        //   const BoxShadow(
+                        //     color: whiteColor,
+                        //     spreadRadius: 2.0,
+                        //     blurRadius: 5.0,
+                        //     offset: Offset(0, -2),
+                        //   ),
+                        // ],
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(50.0),
+                          bottomLeft: Radius.circular(50.0),
+                        )),
+                  ),
+                  SizedBox(
+                    height: 30.0,
+                  ),
+                  Container(
+                    height: 25.0,
+                    width: 15.0,
+                    decoration: BoxDecoration(
+                        color: whiteColor,
+                        // boxShadow: [
+                        //   const BoxShadow(
+                        //     color: greyColor,
+                        //     spreadRadius: 1.0,
+                        //     blurRadius: 1.0,
+                        //   ),
+                        //   const BoxShadow(
+                        //     color: whiteColor,
+                        //     spreadRadius: 2.0,
+                        //     blurRadius: 5.0,
+                        //     offset: Offset(0, -2),
+                        //   ),
+                        // ],
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(50.0),
+                          bottomLeft: Radius.circular(50.0),
+                        )),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class MySeparator extends StatelessWidget {
+  const MySeparator({Key? key, this.height = 1, this.color = Colors.black})
+      : super(key: key);
+  final double height;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final boxWidth = constraints.constrainWidth();
+        const dashWidth = 10.0;
+        final dashHeight = height;
+        final dashCount = (boxWidth / (2 * dashWidth)).floor();
+        return Flex(
+          children: List.generate(dashCount, (_) {
+            return SizedBox(
+              width: dashWidth,
+              height: dashHeight,
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: color),
+              ),
+            );
+          }),
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          direction: Axis.horizontal,
+        );
+      },
     );
   }
 }
@@ -672,14 +959,11 @@ class UpcomingBookingTile extends StatelessWidget {
           ),
       child: GestureDetector(
         onTap: () {
-          // Navigator.of(context).push(
-          //   _createRoute(
-          //       // Individualturf(
-          //       //   turfDetails,
-          //       //   userDetails,
-          //       // ),
-          //       ),
-          // );
+          Navigator.of(context).push(
+            _createRoute(
+              Ticketscreen(bookedDetails),
+            ),
+          );
         },
         child: Container(
           // width: MediaQuery.of(context).size.width - 120,

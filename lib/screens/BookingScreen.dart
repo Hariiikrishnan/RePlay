@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/painting.dart';
+import 'package:fui_kit/fui_kit.dart';
 import 'package:turf_arena/constants.dart';
 import 'package:turf_arena/screens/PaymentError.dart';
 import 'package:turf_arena/screens/booking_success.dart';
@@ -98,6 +100,7 @@ class _BookingScreenState extends State<BookingScreen> {
 
   late String startValue;
   late String endValue;
+  bool disableEverything = false;
 
   String dropdownvalue2 = '2024';
 
@@ -105,9 +108,10 @@ class _BookingScreenState extends State<BookingScreen> {
   late Map details;
 
   List<String> bookedTimes = [];
-
+  DateTime now = DateTime.now();
+  int status = 0;
   String selectedDate = DateFormat("d - MMM").format(DateTime.now());
-  String currentDate = DateFormat("d").format(DateTime.now());
+  String currentDate = DateFormat("d - MMM").format(DateTime.now());
   String currentTimeStr = DateFormat("h a").format(DateTime.now());
 
   // String currentTime = inputFormat.parse(DateTime.now().toString()).toString();
@@ -152,20 +156,87 @@ class _BookingScreenState extends State<BookingScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
+    // print(currentTimeStr);
     amount = widget.details['amtPerHour'];
     details = widget.details;
-    startValue = widget.details['startTime'];
+    // startValue = widget.details['startTime'];
+    makeCurrentBefore();
+    // startValue = currentTimeStr;
 
-    int startIdx = times.indexOf(startValue);
-    endValue = times[startIdx + 1];
     checkAvailablity();
   }
 
-  void checkAvailablity() async {
-    print(selectedDate);
-    var state = await isAvailable(selectedDate, startValue, endValue);
+  void makeCurrentBefore() {
+    disableEverything = false;
+    if (selectedDate == currentDate) {
+      DateTime curr = DateFormat('h a').parse(currentTimeStr);
+      DateTime strt = DateFormat('h a').parse(widget.details['startTime']);
 
+      if (curr.isBefore(strt)) {
+        setState(() {
+          startValue = widget.details['startTime'];
+        });
+        int startIdx = times.indexOf(startValue);
+        setState(() {
+          endValue = times[startIdx + 1];
+        });
+      } else {
+        List<String> list =
+            getTimeList(widget.details['startTime'], widget.details['endTime']);
+        String lastItem = list[list.length - 2];
+        DateTime lastItemDate =
+            _adjustForMidnight(DateFormat('h a').parse(lastItem));
+
+        if (curr.isAfter(DateFormat('h a').parse(lastItem)) ||
+            DateFormat('h a').format(curr) == lastItem) {
+          setState(() {
+            startValue = widget.details['startTime'];
+          });
+          int startIdx = times.indexOf(startValue);
+          setState(() {
+            endValue = times[startIdx + 1];
+            disableEverything = true;
+            amount = 0;
+          });
+        } else {
+          setState(() {
+            startValue = DateFormat("h a").format(now.add(
+              Duration(minutes: 60),
+            ));
+            endValue = DateFormat("h a").format(now.add(
+              Duration(minutes: 120),
+            ));
+            // print(times);
+            // print(startValue);
+            // print(endValue);
+          });
+        }
+      }
+      // print(startValue);
+    } else {
+      print("not equal");
+      setState(() {
+        startValue = widget.details['startTime'];
+      });
+      int startIdx = times.indexOf(startValue);
+      setState(() {
+        endValue = times[startIdx + 1];
+      });
+    }
+  }
+
+  DateTime _adjustForMidnight(DateTime dateTime) {
+    // If the time is '12 AM', adjust it to the next day
+    if (dateTime.hour == 0 && dateTime.minute == 0) {
+      return dateTime.add(Duration(days: 1));
+    }
+    return dateTime;
+  }
+
+  void checkAvailablity() async {
+    // print(selectedDate);
+    var state = await isAvailable(selectedDate, startValue, endValue);
+    print(state);
     if (state == false) {
       setState(() {
         amount = 0;
@@ -196,8 +267,11 @@ class _BookingScreenState extends State<BookingScreen> {
     if (endValue.contains('PM') && endInt != 12) {
       endInt += 12; // Convert PM hours to 24-hour format
     } else if (endValue.contains('AM') && endInt == 12) {
-      endInt = 0; // Convert 12 AM to 0 hours
+      endInt += 12; // Convert 12 AM to 0 hours
     }
+
+    print(startInt.toString() + "Start INt");
+    print(endInt.toString() + "End INt");
 
     if (startValue == endValue) {
       setState(() {
@@ -216,7 +290,9 @@ class _BookingScreenState extends State<BookingScreen> {
         });
       } else {
         setState(() {
-          amount = (endInt - startInt) * 1200;
+          print("chance");
+          amount = (endInt - startInt) * widget.details['amtPerHour'] as int;
+          print(amount.toString());
           isTurfAvailable = state;
         });
       }
@@ -309,7 +385,7 @@ class _BookingScreenState extends State<BookingScreen> {
 
     try {
       HttpsCallable callable =
-          FirebaseFunctions.instance.httpsCallable("createPayment");
+          FirebaseFunctions.instance.httpsCallable("getPaymentStatus");
       dynamic resp = await callable.call({
         "order_amount": amount,
         "order_currency": "INR",
@@ -319,34 +395,73 @@ class _BookingScreenState extends State<BookingScreen> {
           "customer_name":
               widget.userDetails['displayName'] ?? widget.userDetails['email'],
           "customer_email": widget.userDetails['email'],
-          "customer_phone": widget.userDetails['phone'] ?? "",
+          "customer_phone": widget.userDetails['phone'] ?? "9393939393",
         },
         "order_meta": {
           "return_url": "https://bookmyturf.netlify.app/",
         },
       });
+      print(resp);
+      //     if (resp.data['order_status'] == "ACTIVE") {
+      //       setState(() {
+      //         paymentData = resp.data;
+      //         loadingData = false;
+      //       });
+      //       initatePay();
+      //     }
+      //   } on FirebaseFunctionsException catch (e) {
+      //     // Do clever things with e
+      //     print(e.toString());
+      //     setState(() {
+      //       // paymentData = resp.data;
+      //       loadingData = false;
+      //     });
+      //   } catch (e) {
+      //     // Do other things that might be thrown that I have overlooked
+      //     print(e.toString());
+      //     setState(() {
+      //       // paymentData = resp.data;
+      //       loadingData = false;
+      //     });
+      //   }
+      // }
       print(resp.data);
-      if (resp.data['order_status'] == "ACTIVE") {
+      if (resp.data != null) {
+        print("Payment response: ${resp.data}");
+        // Handle successful payment creation logic here
+        if (resp.data['order_status'] == "ACTIVE") {
+          setState(() {
+            paymentData = resp.data;
+            loadingData = false;
+            status = 2;
+          });
+          initatePay();
+        }
+      }
+    } catch (error) {
+      if (error is FirebaseFunctionsException) {
+        if (error.code == 'unauthenticated') {
+          print("User is unauthenticated, trying to reauthenticate...");
+          // await reauthenticateUser();
+
+          setState(() {
+            // paymentData = resp.data;
+            loadingData = false;
+          });
+        } else {
+          print("Error calling createPayment function: ${error.message}");
+          setState(() {
+            // paymentData = resp.data;
+            loadingData = false;
+          });
+        }
+      } else {
+        print("Unknown error: $error");
         setState(() {
-          paymentData = resp.data;
+          // paymentData = resp.data;
           loadingData = false;
         });
-        initatePay();
       }
-    } on FirebaseFunctionsException catch (e) {
-      // Do clever things with e
-      print(e.toString());
-      setState(() {
-        // paymentData = resp.data;
-        loadingData = false;
-      });
-    } catch (e) {
-      // Do other things that might be thrown that I have overlooked
-      print(e.toString());
-      setState(() {
-        // paymentData = resp.data;
-        loadingData = false;
-      });
     }
   }
 
@@ -355,22 +470,23 @@ class _BookingScreenState extends State<BookingScreen> {
 
     try {
       HttpsCallable callable =
-          FirebaseFunctions.instance.httpsCallable("getPaymentStatus");
+          FirebaseFunctions.instance.httpsCallable("places");
       dynamic resp = await callable.call({"order_id": order_id});
       print(resp.data);
       if (resp.data['order_status'] == "PAID") {
+        // initatePay();
+        await addBooking(order_id, true);
         setState(() {
           // paymentData = resp.data;
           // loadingData = false;
           isPaid = true;
+          status = 3;
         });
-        // initatePay();
         Navigator.of(context).push(
           _createRoute(
             BookingSuccess(),
           ),
         );
-        addBooking(order_id, true);
       } else if (resp.data['order_status'] == "ACTIVE") {
         Navigator.of(context).push(
           _createRoute(
@@ -481,7 +597,10 @@ class _BookingScreenState extends State<BookingScreen> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(40.0),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(40.0),
+                        topRight: Radius.circular(40.0),
+                      ),
                       color: Colors.white,
                     ),
                     child: Padding(
@@ -637,8 +756,11 @@ class _BookingScreenState extends State<BookingScreen> {
                                           // initatePay();
                                           setState(() {
                                             loadingData = true;
+                                            status = 1;
                                           });
                                           !isPaid ? getFunction() : null;
+                                          // getPaymentStatus(
+                                          //     "order_103321992qUmD3WjKQj43YCKmzrj7vCSN6l");
 
                                           // addBooking();
                                         },
@@ -873,7 +995,7 @@ class _BookingScreenState extends State<BookingScreen> {
     // Convert to Firestore Timestamp
     // Timestamp firestoreTimestamp = convertToFirestoreTimestamp(selectedDate,startValue);
 
-    print(date);
+    // print(date);
 
     // Query Firestore for bookings within the date range
 
@@ -924,6 +1046,167 @@ class _BookingScreenState extends State<BookingScreen> {
       print("Error converting date and time: $e");
       throw e;
     }
+  }
+
+  void showInfoSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Container(
+          height: 300.0,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: whiteColor,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(50.0),
+              topRight: Radius.circular(50.0),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 30.0,
+              horizontal: 30.0,
+            ),
+            child: Column(
+              spacing: 10.0,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Info",
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(
+                          Icons.cancel,
+                          size: 30.0,
+                          color: Colors.red,
+                        ))
+                  ],
+                ),
+                Row(
+                  // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                      margin: EdgeInsets.all(4.0),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[350],
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8.0,
+                          horizontal: 14.0,
+                        ),
+                        child: Text(
+                          "9 AM",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 30.0,
+                    ),
+                    Text(
+                      "Available Slots",
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontSize: 15.0,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                      margin: EdgeInsets.all(4.0),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8.0,
+                          horizontal: 14.0,
+                        ),
+                        child: Text(
+                          "9 AM",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 30.0,
+                    ),
+                    Text(
+                      "Booked Slots",
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontSize: 15.0,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                      margin: EdgeInsets.all(4.0),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8.0,
+                          horizontal: 14.0,
+                        ),
+                        child: Text(
+                          "9 AM",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 30.0,
+                    ),
+                    Text(
+                      "Selected Slots",
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontSize: 15.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -1028,8 +1311,12 @@ class _BookingScreenState extends State<BookingScreen> {
                                     selectedDate = date;
                                   });
                                   // checkAvailablity();
+                                  makeCurrentBefore();
                                   calcAmount(
-                                      selectedDate, startValue, endValue);
+                                    selectedDate,
+                                    startValue,
+                                    endValue,
+                                  );
                                 },
                                 selectedDate,
                               ),
@@ -1048,6 +1335,7 @@ class _BookingScreenState extends State<BookingScreen> {
                                     selectedDate = date;
                                   });
                                   // checkAvailablity();
+                                  makeCurrentBefore();
                                   calcAmount(
                                       selectedDate, startValue, endValue);
                                 },
@@ -1068,6 +1356,7 @@ class _BookingScreenState extends State<BookingScreen> {
                                     selectedDate = date;
                                   });
                                   // checkAvailablity();
+                                  makeCurrentBefore();
                                   calcAmount(
                                       selectedDate, startValue, endValue);
                                 },
@@ -1087,7 +1376,7 @@ class _BookingScreenState extends State<BookingScreen> {
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(16.0),
                         image: DecorationImage(
-                          image: AssetImage("images/grass_bg.jpg"),
+                          image: AssetImage("images/grass.jpg"),
                           repeat: ImageRepeat.repeatX,
                           // fit: BoxFit.cover,
                           // scale: 1.5,
@@ -1162,14 +1451,20 @@ class _BookingScreenState extends State<BookingScreen> {
                                 SizedBox(
                                   width: 5.0,
                                 ),
-                                Icon(
-                                  isTurfAvailable
-                                      ? Icons.check_circle
-                                      : Icons.cancel,
-                                  color: isTurfAvailable
-                                      ? Colors.green
-                                      : Colors.red,
-                                  size: 22.0,
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: whiteColor,
+                                    borderRadius: BorderRadius.circular(100.0),
+                                  ),
+                                  child: Icon(
+                                    isTurfAvailable
+                                        ? Icons.check_circle
+                                        : Icons.cancel,
+                                    color: isTurfAvailable
+                                        ? Colors.green
+                                        : Colors.red,
+                                    size: 22.0,
+                                  ),
                                 )
                               ],
                             ),
@@ -1184,13 +1479,29 @@ class _BookingScreenState extends State<BookingScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            "Slots",
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontSize: 17.0,
-                              fontWeight: FontWeight.w500,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Slots",
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontSize: 17.0,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  showInfoSheet();
+                                },
+                                icon: FUI(
+                                  BoldRounded.INFO,
+                                  color: primaryColor,
+                                  height: 20.0,
+                                  width: 20.0,
+                                ),
+                              ),
+                            ],
                           ),
                           Expanded(
                             child: TimeSlotWidget(
@@ -1249,76 +1560,136 @@ class _BookingScreenState extends State<BookingScreen> {
                             style: TextStyle(
                               color: greenColor,
                               fontSize: 18.0,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
                         ],
                       ),
-                      TextButton(
-                          style: TextButton.styleFrom(
-                            // enableFeedback: isTurfAvailable,
-                            backgroundColor: isTurfAvailable
-                                ? amount > 0
-                                    ? greenColor
-                                    : Colors.grey[400]
-                                : greyColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30.0),
-                            ),
-                            fixedSize: Size(150, 50),
+                      TextButton.icon(
+                        style: TextButton.styleFrom(
+                          // enableFeedback: isTurfAvailable,
+                          backgroundColor: isTurfAvailable
+                              ? amount > 0
+                                  ? (status == 0)
+                                      ? greenColor
+                                      : status == 3
+                                          ? Colors.green
+                                          : greenColor.withOpacity(0.75)
+                                  : Colors.grey[400]
+                              : Colors.grey[400],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30.0),
                           ),
-                          onPressed: () {
-                            // showModalBottomSheet<void>
-                            final snackBar = SnackBar(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                30.0,
-                              )),
-                              // margin: EdgeInsets.symmetric(
-                              //   horizontal: 20.0,
-                              //   vertical: 50.0,
-                              // ),
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 20.0,
-                                vertical: 5.0,
-                              ),
-                              // elevation: 6.0,
-                              // behavior: SnackBarBehavior.floating,
-                              backgroundColor: Colors.red[400],
-                              content: Text(
-                                'Please Select Different Slot!',
-                                style: TextStyle(
-                                    color: whiteColor,
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                              showCloseIcon: true,
-                              closeIconColor: whiteColor,
-                            );
-
-                            isTurfAvailable
-                                ? amount > 0
-                                    ? showBottomSheet()
-                                    : null
-                                :
-
-                                // Find the ScaffoldMessenger in the widget tree
-                                // and use it to show a SnackBar.
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(snackBar);
-                            ;
-                            // initatePay();
-
-                            // addBooking();
-                          },
-                          child: Text(
-                            "Book Now",
-                            style: TextStyle(
-                              color: whiteColor,
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.w600,
+                          fixedSize: Size(165, 50),
+                        ),
+                        onPressed: () {
+                          // showModalBottomSheet<void>
+                          final snackBar = SnackBar(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                              30.0,
+                            )),
+                            margin: EdgeInsets.symmetric(
+                              horizontal: 5.0,
+                              vertical: 5.0,
                             ),
-                          ))
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 30.0,
+                              vertical: 5.0,
+                            ),
+                            elevation: 50.0,
+                            behavior: SnackBarBehavior.floating,
+                            backgroundColor: Colors.red[400],
+                            content: Text(
+                              'Please Select Different Slot!',
+                              style: TextStyle(
+                                color: whiteColor,
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            showCloseIcon: true,
+                            closeIconColor: whiteColor,
+                          );
+
+                          isTurfAvailable
+                              ? amount > 0
+                                  ? showBottomSheet()
+                                  : null
+                              :
+
+                              // Find the ScaffoldMessenger in the widget tree
+                              // and use it to show a SnackBar.
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(snackBar);
+                          ;
+                          // initatePay();
+
+                          // addBooking();
+                        },
+                        iconAlignment: IconAlignment.end,
+                        icon: (status != 0 && status != 3)
+                            ? Transform.scale(
+                                scale: 0.5,
+                                child: CircularProgressIndicator(
+                                  // value: 0.5,
+                                  color: whiteColor.withOpacity(0.7),
+                                ),
+                              )
+                            : status == 3
+                                ? Container(
+                                    height: 20.0,
+                                    width: 20.0,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(50.0),
+                                      color: whiteColor,
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(4.0),
+                                      child: FUI(
+                                        BoldRounded.CHECK,
+                                        color: Colors.green,
+                                        height: 12.0,
+                                      ),
+                                    ),
+                                  )
+                                : null,
+                        label: status == 0
+                            ? Text(
+                                "Book Now",
+                                style: TextStyle(
+                                  color: whiteColor,
+                                  fontSize: 17.0,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              )
+                            : status == 2
+                                ? Text(
+                                    "Processing",
+                                    style: TextStyle(
+                                      color: whiteColor,
+                                      fontSize: 17.0,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  )
+                                : status == 3
+                                    ? Text(
+                                        "Booked",
+                                        style: TextStyle(
+                                          color: whiteColor,
+                                          fontSize: 17.0,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      )
+                                    : Text(
+                                        "Booking",
+                                        style: TextStyle(
+                                          color: whiteColor,
+                                          fontSize: 17.0,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                      ),
                     ],
                   ),
                 ),
@@ -1349,13 +1720,25 @@ class _BookingScreenState extends State<BookingScreen> {
     List<String> sublist = [];
     if (name == "Start") {
       // print("Start");
+
       timeZones.add(timeZones.removeLast());
       sublist.add(timeZones.removeLast());
-      // print(timeZones);
-      // print(sublist);
+      print(timeZones);
+      print(sublist);
     }
 
-    bool greaterTime(String selectedStart, String itemValue) {
+    // if (currentDate == selectedDate) {
+    //   if (currentTimeStr == timeZones[timeZones.length - 1] ||
+    //       DateFormat('h a')
+    //           .parse(currentTimeStr)
+    //           .isAfter(DateFormat('h a').parse(timeZones.last))) {
+    //     setState(() {
+    //       selectedStart = timeZones.last;
+    //       selectedEnd = sublist.last;
+    //     });
+    //   }
+    // }
+    bool greaterTime(String selectedStart, String itemValue, String type) {
       // Ensure both strings have the correct length
       if (selectedStart.length < 4 || itemValue.length < 4) {
         throw FormatException(
@@ -1386,18 +1769,30 @@ class _BookingScreenState extends State<BookingScreen> {
       if (selectedPeriod == "AM" && selectedHour == 12) {
         selectedTotalHours = 0; // 12 AM is 0 hours
       }
-      // if (itemPeriod == "AM" && itemHour == 12) {
-      // itemTotalHours = 24; // 12 AM is 0 hours
-      // }
+      if (itemPeriod == "AM" && itemHour == 12) {
+        itemTotalHours = 0; // 12 AM is 0 hours
+      }
 
       // Compare total hours
-      return itemTotalHours < selectedTotalHours;
+
+      if (type == "End") {
+        return itemTotalHours <= selectedTotalHours;
+      } else {
+        return itemTotalHours < selectedTotalHours;
+        // return itemTotalHours > selectedTotalHours;
+      }
     }
 
+    bool state = true;
     bool checkEnable(String selectedStart, String item) {
-      bool state = greaterTime(selectedStart, currentTimeStr);
+      if (selectedDate == currentDate) {
+        print("Checking ");
+        state = greaterTime(item, currentTimeStr, "Start");
+        print(state);
+      }
+      // print(state);
       if (name == "End") {
-        state = greaterTime(selectedStart, item);
+        state = !greaterTime(selectedStart, item, "End");
       }
       return state;
     }
@@ -1442,16 +1837,22 @@ class _BookingScreenState extends State<BookingScreen> {
               // Array list of items
               disabledHint: Text(""),
               items: timeZones.map((String items) {
+                // print(items);
+                // print(selectedStart);
                 return DropdownMenuItem(
-                  enabled: checkEnable(selectedStart, items),
+                  enabled: disableEverything
+                      ? false
+                      : checkEnable(selectedStart, items),
                   value: items,
                   child: Text(
                     items,
                     style: TextStyle(
                       fontSize: 14.0,
-                      color: checkEnable(selectedStart, items)
-                          ? whiteColor
-                          : Color.fromARGB(143, 213, 213, 213),
+                      color: disableEverything
+                          ? Color.fromARGB(143, 213, 213, 213)
+                          : checkEnable(selectedStart, items)
+                              ? whiteColor
+                              : Color.fromARGB(143, 213, 213, 213),
                     ),
                   ),
                   // child: name == "End"
@@ -1490,7 +1891,7 @@ class DateTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       style: TextButton.styleFrom(
-        backgroundColor: selectedDate == date ? greenColor : Colors.grey[350],
+        backgroundColor: selectedDate == date ? greenColor : Colors.grey[300],
         // side: BorderSide(
         //   width: 2.0,
         //   color: scaffoldColor,
@@ -1506,9 +1907,9 @@ class DateTile extends StatelessWidget {
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: 4.0,
-          // vertical: 2.0,
-        ),
+            // horizontal: 4.0,
+            // vertical: 2.0,
+            ),
         child: Text(
           date,
           // date.substring(0, 2),
@@ -1579,12 +1980,31 @@ class TimeSlotWidget extends StatelessWidget {
     required this.newEnd,
   });
 
+  // bool isTimeInRange(String time, String newStart, String newEnd) {
+  //   DateFormat inputFormat = DateFormat('h a'); // Handle time with minutes
+  //   try {
+  //     DateTime startTime = inputFormat.parse(newStart);
+  //     DateTime endTime = inputFormat.parse(newEnd);
+  //     DateTime currentTime = inputFormat.parse(time);
+
+  //     return (currentTime.isAfter(startTime) &&
+  //             currentTime.isBefore(endTime)) ||
+  //         currentTime == startTime ||
+  //         currentTime == endTime;
+  //   } catch (e) {
+  //     print('Error parsing time in range: $e');
+  //     return false;
+  //   }
+  // }
+
   bool isTimeInRange(String time, String newStart, String newEnd) {
     DateFormat inputFormat = DateFormat('h a'); // Handle time with minutes
+
     try {
-      DateTime startTime = inputFormat.parse(newStart);
-      DateTime endTime = inputFormat.parse(newEnd);
-      DateTime currentTime = inputFormat.parse(time);
+      // Check if the times are '12 AM' and adjust to the next day
+      DateTime startTime = _adjustForMidnight(inputFormat.parse(newStart));
+      DateTime endTime = _adjustForMidnight(inputFormat.parse(newEnd));
+      DateTime currentTime = _adjustForMidnight(inputFormat.parse(time));
 
       return (currentTime.isAfter(startTime) &&
               currentTime.isBefore(endTime)) ||
@@ -1596,6 +2016,14 @@ class TimeSlotWidget extends StatelessWidget {
     }
   }
 
+  DateTime _adjustForMidnight(DateTime dateTime) {
+    // If the time is '12 AM', adjust it to the next day
+    if (dateTime.hour == 0 && dateTime.minute == 0) {
+      return dateTime.add(Duration(days: 1));
+    }
+    return dateTime;
+  }
+
   @override
   Widget build(BuildContext context) {
     // Generate all time slots for the day in 15-minute intervals
@@ -1605,34 +2033,36 @@ class TimeSlotWidget extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         print("Tapped");
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-            30.0,
-          )),
-          // margin: EdgeInsets.symmetric(
-          //   horizontal: 20.0,
-          //   vertical: 50.0,
-          // ),
-          padding: EdgeInsets.symmetric(
-            horizontal: 30.0,
-            vertical: 0.0,
-          ),
-          // elevation: 6.0,
-          // behavior: SnackBarBehavior.floating,
-          backgroundColor: primaryColor,
-          content: Text(
-            'Please Use Slot DropDown!',
-            style: TextStyle(
-              color: whiteColor,
-              fontSize: 15.0,
-              fontWeight: FontWeight.w500,
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(
+              30.0,
+            )),
+            margin: EdgeInsets.symmetric(
+              horizontal: 5.0,
+              vertical: 5.0,
             ),
-            textAlign: TextAlign.start,
+            padding: EdgeInsets.symmetric(
+              horizontal: 30.0,
+              vertical: 5.0,
+            ),
+            elevation: 50.0,
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: primaryColor.withOpacity(0.8),
+            content: Text(
+              'Please Use Slot DropDown!',
+              style: TextStyle(
+                color: whiteColor.withOpacity(0.7),
+                fontSize: 15.0,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.start,
+            ),
+            showCloseIcon: true,
+            closeIconColor: whiteColor,
           ),
-          showCloseIcon: true,
-          closeIconColor: whiteColor,
-        ));
+        );
       },
       child: GridView.builder(
         padding: EdgeInsets.zero,

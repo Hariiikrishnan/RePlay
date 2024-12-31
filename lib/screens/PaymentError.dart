@@ -8,7 +8,7 @@ class PaymentError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: secondaryColor,
+      backgroundColor: whiteColor,
       body: Container(
         width: double.infinity,
         child: Padding(
@@ -35,8 +35,8 @@ class PaymentError extends StatelessWidget {
                     Text(
                       "Booking Failed!",
                       style: TextStyle(
-                        color: whiteColor,
-                        fontSize: 22.0,
+                        color: primaryColor,
+                        fontSize: 20.0,
                         fontWeight: FontWeight.w600,
                       ),
                       textAlign: TextAlign.center,
@@ -44,8 +44,8 @@ class PaymentError extends StatelessWidget {
                     Text(
                       "Please Try Again.",
                       style: TextStyle(
-                        color: whiteColor,
-                        fontSize: 22.0,
+                        color: primaryColor,
+                        fontSize: 20.0,
                         fontWeight: FontWeight.w600,
                       ),
                       textAlign: TextAlign.center,
@@ -58,7 +58,7 @@ class PaymentError extends StatelessWidget {
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: whiteColor,
+                    backgroundColor: primaryColor,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                       10.0,
@@ -66,7 +66,7 @@ class PaymentError extends StatelessWidget {
                 child: Text(
                   "Back",
                   style: TextStyle(
-                    color: secondaryColor,
+                    color: whiteColor,
                     fontSize: 18.0,
                   ),
                 ),

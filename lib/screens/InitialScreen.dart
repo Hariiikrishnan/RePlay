@@ -8,8 +8,9 @@ import 'package:turf_arena/constants.dart';
 import 'package:camera/camera.dart';
 
 class InitialScreen extends StatelessWidget {
-  const InitialScreen({super.key, required this.cameras});
+  const InitialScreen({super.key, required this.cameras, required this.alt});
   final List<CameraDescription> cameras;
+  final String alt;
 
   Route _createRoute(Widget ScreenName) {
     return PageRouteBuilder(
@@ -48,7 +49,7 @@ class InitialScreen extends StatelessWidget {
                 // alignment: Alignment.center,
                 fit: BoxFit.cover,
                 // scale: 2,
-                image: AssetImage("images/initial.jpg"),
+                image: AssetImage("images/grass_bg.jpg"),
               ),
             ),
           ),
@@ -86,63 +87,21 @@ class InitialScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width / 2,
-                            height: MediaQuery.of(context).size.height / 14.0,
-                            child: Stack(
-                              children: [
-                                Align(
-                                  alignment: Alignment.topRight,
-                                  child: Container(
-                                    transform: Matrix4.identity()
-                                      ..translate(0.0,
-                                          0.0) // Move right by 50 and down by 100
-                                      ..rotateZ(0.06),
-                                    width:
-                                        MediaQuery.of(context).size.width / 2.3,
-                                    height: 50.0,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(6.0),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: MediaQuery.of(context).size.width / 2,
-                                  height: 50.0,
-                                  decoration: BoxDecoration(
-                                    color: greenColor,
-                                    borderRadius: BorderRadius.circular(6.0),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 15.0, vertical: 8.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          "Re Play",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18.0,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          Text(
+                            'Welcome Chief',
+                            softWrap: true,
+                            textAlign: TextAlign.start,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 25.0,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           SizedBox(
                             height: 20.0,
                           ),
                           Text(
-                            'While grass courts are more traditional than other types of tennis courts,',
+                            'Re-Play lets you easily book turfs and share your game moments. Play, book, and enjoy - all in one app!',
                             softWrap: true,
                             textAlign: TextAlign.start,
                             style: TextStyle(
@@ -156,16 +115,16 @@ class InitialScreen extends StatelessWidget {
                           TextButton(
                             style: TextButton.styleFrom(
                                 backgroundColor: whiteColor,
+                                elevation: 15.2,
+                                overlayColor: greyColor,
                                 fixedSize: Size(
-                                  150.0,
-                                  45.0,
+                                  135.0,
+                                  40.0,
                                 )),
                             onPressed: () {
                               Navigator.of(context).push(
                                 _createRoute(
-                                  LoginScreen(
-                                    cameras: cameras,
-                                  ),
+                                  LoginScreen(cameras: cameras, alt: alt),
                                 ),
                               );
                             },

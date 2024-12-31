@@ -14,8 +14,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Registerscreen extends StatefulWidget {
-  const Registerscreen({super.key, required this.cameras});
+  const Registerscreen({super.key, required this.cameras, required this.alt});
   final List<CameraDescription> cameras;
+  final String alt;
   @override
   State<Registerscreen> createState() => _RegisterscreenState();
 }
@@ -29,6 +30,7 @@ class _RegisterscreenState extends State<Registerscreen> {
   String? email;
   String? phoneNumber;
   String? password;
+  String? displayName;
 
   late Map<String, dynamic> userData;
 
@@ -70,11 +72,19 @@ class _RegisterscreenState extends State<Registerscreen> {
           borderRadius: BorderRadius.circular(
         30.0,
       )),
-      padding: EdgeInsets.symmetric(
-        horizontal: 20.0,
-        vertical: 20.0,
+      margin: EdgeInsets.symmetric(
+        horizontal: 5.0,
+        vertical: 5.0,
       ),
+      padding: EdgeInsets.symmetric(
+        horizontal: 30.0,
+        vertical: 5.0,
+      ),
+      elevation: 50.0,
+      behavior: SnackBarBehavior.floating,
       backgroundColor: Colors.red[400],
+      showCloseIcon: true,
+      closeIconColor: whiteColor,
       content: Text(
         msg,
         style: TextStyle(
@@ -103,7 +113,7 @@ class _RegisterscreenState extends State<Registerscreen> {
     try {
       // _auth.sendSignInLinkToEmail(email: email, actionCodeSettings: acs);
 
-      if (email == null || password == null) {}
+      if (email == null || password == null || phoneNumber == null) {}
       UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
         email: email!,
@@ -151,8 +161,9 @@ class _RegisterscreenState extends State<Registerscreen> {
               'email': user.email,
               'displayName': user.displayName,
               'photoURL': user.photoURL,
-              'createdAt': FieldValue.serverTimestamp(),
+              'isAdmin': false,
               'liked': [],
+              'moments': [],
             };
           });
         } else {
@@ -160,8 +171,9 @@ class _RegisterscreenState extends State<Registerscreen> {
             userData = {
               'uid': user.uid,
               'email': user.email,
-              'createdAt': FieldValue.serverTimestamp(),
+              'isAdmin': false,
               'liked': [],
+              'moments': [],
             };
           });
         }
@@ -226,8 +238,8 @@ class _RegisterscreenState extends State<Registerscreen> {
             'uid': user.uid,
             'email': user.email,
             'displayName': user.displayName,
+            'moments': [],
             'photoURL': user.photoURL,
-            'createdAt': FieldValue.serverTimestamp(),
           };
         });
         await FirebaseFirestore.instance
@@ -250,11 +262,8 @@ class _RegisterscreenState extends State<Registerscreen> {
       // // print(userData);
       print('User signed in with Google and added to Firestore');
 
-      Navigator.of(context).push(_createRoute(
-        App(
-          userData,
-          widget.cameras,
-        ),
+      Navigator.of(context).pushReplacement(_createRoute(
+        App(userData, widget.cameras, widget.alt),
       ));
       return userData;
     } else {
@@ -314,12 +323,12 @@ class _RegisterscreenState extends State<Registerscreen> {
           print(verificationId);
           Navigator.of(context).push(_createRoute(
             Otpscreen(
-                verificationId: verificationId,
-                userData: userData,
-                phoneNo: phoneController.text,
-                cameras: widget.cameras
-                // url: "",
-                ),
+              verificationId: verificationId,
+              userData: userData,
+              phoneNo: phoneController.text,
+              cameras: widget.cameras,
+              alt: widget.alt,
+            ),
           ));
         },
         codeAutoRetrievalTimeout: (verificationId) {
@@ -356,11 +365,19 @@ class _RegisterscreenState extends State<Registerscreen> {
                 30.0,
               ),
             ),
-            padding: EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 20.0,
+            margin: EdgeInsets.symmetric(
+              horizontal: 5.0,
+              vertical: 5.0,
             ),
+            padding: EdgeInsets.symmetric(
+              horizontal: 30.0,
+              vertical: 5.0,
+            ),
+            elevation: 50.0,
+            behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.red[400],
+            showCloseIcon: true,
+            closeIconColor: whiteColor,
             content: Text(
               "Error Occured. Try Again!",
               style: TextStyle(
@@ -378,12 +395,13 @@ class _RegisterscreenState extends State<Registerscreen> {
         print("Code sent to phone number.");
         Navigator.of(context).pushReplacement(_createRoute(
           Otpscreen(
-              verificationId: verificationId,
-              userData: userData,
-              phoneNo: phoneNumber!,
-              cameras: widget.cameras
-              // url: downloadUrl,
-              ),
+            verificationId: verificationId,
+            userData: userData,
+            phoneNo: phoneNumber!,
+            cameras: widget.cameras,
+            alt: widget.alt,
+            // url: downloadUrl,
+          ),
         ));
       },
       codeAutoRetrievalTimeout: (String verificationId) {
@@ -488,14 +506,20 @@ class _RegisterscreenState extends State<Registerscreen> {
         password: password,
       );
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Sign-up complete!')),
+        SnackBar(
+            content: Text(
+          'Sign-up complete!',
+        )),
       );
       Navigator.pop(
           context); // Navigate away from this screen or to home screen
     } catch (e) {
       print("Error signing up with email and password: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error signing up')),
+        SnackBar(
+            content: Text(
+          'Error signing up',
+        )),
       );
     }
   }
@@ -559,7 +583,7 @@ class _RegisterscreenState extends State<Registerscreen> {
                       Text(
                         "Experience the Turf Again.",
                         style: TextStyle(
-                          color: Colors.grey[500],
+                          color: primaryColor.withOpacity(0.4),
                           fontSize: 20.0,
                           fontWeight: FontWeight.w500,
                         ),
@@ -669,7 +693,7 @@ class _RegisterscreenState extends State<Registerscreen> {
                                   setState(() {
                                     showSpinner = true;
                                   });
-
+                                  FocusManager.instance.primaryFocus?.unfocus();
                                   // verifyPhoneNumber();
                                   // sendEmailVerificationLink(username);
                                   registerAndAddToFirestore();
@@ -771,10 +795,11 @@ class _RegisterscreenState extends State<Registerscreen> {
                               ),
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context).push(
+                                  Navigator.of(context).pushReplacement(
                                     _createRoute(
                                       LoginScreen(
                                         cameras: widget.cameras,
+                                        alt: widget.alt,
                                       ),
                                     ),
                                   );

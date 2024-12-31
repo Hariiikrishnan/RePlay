@@ -71,6 +71,7 @@ class _TurfsListState extends State<TurfsList> {
     (filter == "Other Turfs" ||
             filter == "Football" ||
             filter == "Badminton" ||
+            filter == "Cricket" ||
             filter == "Tennis")
         ? fetchTurfs()
         : widget.title == "Favorites"
@@ -310,7 +311,7 @@ class _TurfsListState extends State<TurfsList> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.grey[700],
-                          fontSize: 22.0,
+                          fontSize: 20.0,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -366,11 +367,14 @@ class _TurfsListState extends State<TurfsList> {
                                       decoration: BoxDecoration(
                                         color: Colors.grey[300],
                                         borderRadius: BorderRadius.circular(
-                                          60.0,
+                                          100.0,
                                         ),
                                       ),
                                       child: Padding(
-                                        padding: const EdgeInsets.all(6.0),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6.0,
+                                          vertical: 6.0,
+                                        ),
                                         child: SearchBar(
                                           textInputAction:
                                               TextInputAction.search,
@@ -424,51 +428,9 @@ class _TurfsListState extends State<TurfsList> {
                                     });
                                   },
                                 ),
-
                                 SizedBox(
                                   height: 10.0,
                                 ),
-                                // Padding(
-                                //   padding: const EdgeInsets.only(
-                                //     top: 8.0,
-                                //     left: 8.0,
-                                //     right: 8.0,
-                                //     bottom: 12.0,
-                                //   ),
-                                //   child: Container(
-                                //     child: TextField(
-                                //       style: TextStyle(
-                                //         color: whiteColor,
-                                //       ),
-                                //       onSubmitted: (value) {
-                                //         Navigator.of(context).push(
-                                //           _createRoute(
-                                //             TurfsList(
-                                //                 value, widget.userDetails),
-                                //           ),
-                                //         );
-                                //       },
-                                //       textInputAction: TextInputAction.search,
-                                //       decoration: kTextFieldDecoration,
-                                //     ),
-                                //     decoration: BoxDecoration(
-                                //       color: primaryColor,
-                                //       borderRadius: BorderRadius.circular(30.0),
-                                //       // backgroundBlendMode: BlendMode.screen,
-                                //       border: Border.all(
-                                //         width: 1.0,
-                                //         color: greyColor,
-                                //       ),
-                                //       image: DecorationImage(
-                                //         fit: BoxFit.cover,
-                                //         opacity: 0.6,
-                                //         image: AssetImage(
-                                //           "images/grass_bg.jpg",
-                                //         ),
-                                //       ),
-                                //     ),
-                                //   ),
-                                // ),
                                 Expanded(
                                   child: ListView.builder(
                                     padding: EdgeInsets.zero,
@@ -574,91 +536,104 @@ class TurfTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-          // vertical: 10.0,
-          ),
+        vertical: 4.0,
+      ),
       child: Container(
-          decoration: BoxDecoration(
-            // boxShadow: [
-            //   BoxShadow(
-            //     color: greyColor.withOpacity(0.2),
-            //     spreadRadius: 2,
-            //     blurRadius: 7,
-            //     offset: Offset(0, 1), // changes position of shadow
-            //   ),
-            // ],
-            borderRadius: BorderRadius.circular(30.0),
-            // color: greenColor.withOpacity(0.1),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              // horizontal: 8.0,
-              vertical: 4.0,
+        decoration: BoxDecoration(
+          // color: Colors.grey[200],
+          // boxShadow: [
+          //   BoxShadow(
+          //     color: greyColor.withOpacity(0.2),
+          //     spreadRadius: 2,
+          //     blurRadius: 7,
+          //     offset: Offset(0, 1), // changes position of shadow
+          //   ),
+          // ],
+          borderRadius: BorderRadius.circular(24.0),
+          // color: greenColor.withOpacity(0.1),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24.0),
+              child: Image(
+                // width: 150.0,
+                height: 150.0,
+                fit: BoxFit.cover,
+                image: (details['imgList'] == null ||
+                        details['imgList'].isEmpty)
+                    ? AssetImage(
+                        "images/turf_img.jpg",
+                      )
+                    : Image.network(
+                        details['imgList'][0],
+                        loadingBuilder: (BuildContext context, Widget child,
+                            ImageChunkEvent? loadingProgress) {
+                          if (loadingProgress == null) {
+                            return child; // Image is fully loaded
+                          }
+                          return Skeletonizer(
+                            enabled: true,
+                            enableSwitchAnimation: true,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16.0),
+                              child: Container(
+                                height: double.maxFinite,
+                                width: 160.0,
+                                color: greyColor,
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (BuildContext context, Object error,
+                            StackTrace? stackTrace) {
+                          return Icon(Icons.error, color: Colors.red, size: 50);
+                        },
+                      ).image,
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(24.0),
-                  child: Image(
-                    // width: 150.0,
-                    height: 150.0,
-                    fit: BoxFit.cover,
-                    image: AssetImage(
-                      "images/cricket.png",
-                    ),
+            Container(
+              decoration: BoxDecoration(
+                  // borderRadius: BorderRadius.circular(2.0),
+                  // border: Border(
+                  //     bottom: BorderSide(
+                  //   width: 3.0,
+                  //   color: Colors.grey[400]!,
+                  // )),
                   ),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  top: 12.0,
+                  // left: 8.0,
+                  // right: 8.0,
+                  bottom: 12.0,
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                      // borderRadius: BorderRadius.circular(2.0),
-                      // border: Border(
-                      //     bottom: BorderSide(
-                      //   width: 3.0,
-                      //   color: Colors.grey[400]!,
-                      // )),
-                      ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      top: 12.0,
-                      // left: 8.0,
-                      // right: 8.0,
-                      bottom: 12.0,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              capitalize(details['name']),
-                              style: TextStyle(
-                                color: primaryColor,
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            Text(
-                              "Opens On : " +
-                                  details['startTime'] +
-                                  " - " +
-                                  details['endTime'],
-                              style: TextStyle(
-                                color: Colors.black54,
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            // Text(
-                            //   details['address'],
-                            //   style: TextStyle(
-                            //     color: primaryColor,
-                            //     fontSize: 28.0,
-                            //     fontWeight: FontWeight.w400,
-                            //   ),
-                            // ),
-                          ],
+                        Text(
+                          capitalize(details['name']),
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Text(
+                          "Opens On : " +
+                              details['startTime'] +
+                              " - " +
+                              details['endTime'],
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         // Text(
                         //   details['address'],
@@ -668,37 +643,47 @@ class TurfTile extends StatelessWidget {
                         //     fontWeight: FontWeight.w400,
                         //   ),
                         // ),
-                        SizedBox(
-                          width: 10.0,
+                      ],
+                    ),
+                    // Text(
+                    //   details['address'],
+                    //   style: TextStyle(
+                    //     color: primaryColor,
+                    //     fontSize: 28.0,
+                    //     fontWeight: FontWeight.w400,
+                    //   ),
+                    // ),
+                    SizedBox(
+                      width: 10.0,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "₹ " + details['amtPerHour'].toString() + "/-",
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "₹ " + details['amtPerHour'].toString() + "/-",
-                              style: TextStyle(
-                                color: primaryColor,
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            Text(
-                              "Per Hour",
-                              style: TextStyle(
-                                color: Colors.black38,
-                                fontSize: 13.0,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          "Per Hour",
+                          style: TextStyle(
+                            color: Colors.black38,
+                            fontSize: 13.0,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          )),
+          ],
+        ),
+      ),
     );
   }
 }

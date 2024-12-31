@@ -10,7 +10,7 @@ class BookingSuccess extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: secondaryColor,
+      backgroundColor: primaryColor,
       body: Container(
         width: double.infinity,
         child: Column(

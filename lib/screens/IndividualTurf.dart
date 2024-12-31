@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:fui_kit/fui_kit.dart';
 import 'package:turf_arena/screens/BookingScreen.dart';
 import 'package:turf_arena/screens/SuccessBook.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,6 +9,7 @@ import 'package:turf_arena/constants.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 
 class Individualturf extends StatefulWidget {
   Individualturf(this.details, this.userDetails);
@@ -147,354 +149,416 @@ class _IndividualturfState extends State<Individualturf> {
   Widget build(BuildContext context) {
     return Scaffold(
       // backgroundColor: whiteColor,
-      body: Container(
-        // decoration: BoxDecoration(
-        //   image: DecorationImage(
-        //     alignment: Alignment.topCenter,
-        //     fit: BoxFit.fitWidth,
-        //     image: AssetImage("images/turf_bg1.png"),
-        //   ),
-        // ),
-        height: double.infinity,
-        child: Column(
-          children: [
-            Stack(
-              children: [
-                Container(
-                  // transform: Matrix4.identity()..scale(1.2),
-                  width: double.infinity,
-                  // height: MediaQuery.of(context).size.height / 1.5,
-                  decoration: BoxDecoration(
-                      // color: Colors.green,
-                      // image: DecorationImage(
-                      //   image: AssetImage("images/turf_bg1.png"),
-                      // ),
-                      ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: MyCarouselContainer(),
-                  ),
-                  // child: Image(image: AssetImage("images/turf_bg1.png")),
-                ),
-                Positioned(
-                  left: 25.0,
-                  top: 40.0,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(
-                      30.0,
+      body: SafeArea(
+        child: Container(
+          // decoration: BoxDecoration(
+          //   image: DecorationImage(
+          //     alignment: Alignment.topCenter,
+          //     fit: BoxFit.fitWidth,
+          //     image: AssetImage("images/turf_bg1.png"),
+          //   ),
+          // ),
+          height: double.infinity,
+          child: Column(
+            children: [
+              Stack(
+                children: [
+                  Container(
+                    // transform: Matrix4.identity()..scale(1.2),
+                    width: double.infinity,
+                    // height: MediaQuery.of(context).size.height / 1.5,
+                    decoration: BoxDecoration(
+                        // color: Colors.green,
+                        // image: DecorationImage(
+                        //   image: AssetImage("images/turf_bg1.png"),
+                        // ),
+                        ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: MyCarouselContainer(widget.details['imgList']),
                     ),
-                    child: BackdropFilter(
-                      filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                      child: Container(
-                        // backgroundColor: whiteColor,
-                        decoration: BoxDecoration(
-                          color: primaryColor.withOpacity(0.45),
-                          borderRadius: BorderRadius.circular(50.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: primaryColor.withOpacity(0.25),
-                              spreadRadius: 2,
-                              blurRadius: 7,
-                              offset:
-                                  Offset(0, 2), // changes position of shadow
-                            ),
-                          ],
-                        ),
-                        // radius: 25.0,
-                        child: IconButton(
-                          splashRadius: 35.0,
-                          // color: Colors.red,
-                          icon: Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            color: whiteColor,
-                            size: 20.0,
-                          ), // Favorite icon
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ),
-                    ),
+                    // child: Image(image: AssetImage("images/turf_bg1.png")),
                   ),
-                ),
-                Positioned(
-                  right: 25.0,
-                  bottom: 20.0,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(
-                      30.0,
-                    ),
-                    child: BackdropFilter(
-                      filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                      child: Container(
-                        // backgroundColor: whiteColor,
-                        decoration: BoxDecoration(
-                          color: isLiked
-                              ? whiteColor
-                              : primaryColor.withOpacity(0.45),
-                          borderRadius: BorderRadius.circular(50.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: primaryColor.withOpacity(0.25),
-                              spreadRadius: 2,
-                              blurRadius: 7,
-                              offset:
-                                  Offset(0, 2), // changes position of shadow
-                            ),
-                          ],
-                        ),
-                        // radius: 25.0,
-                        child: IconButton(
-                          splashRadius: 35.0,
-                          // color: Colors.red,
-                          icon: Icon(
-                            isLiked
-                                ? Icons.favorite_rounded
-                                : Icons.favorite_border_rounded,
-                            color: isLiked ? greenColor : whiteColor,
-                            size: 30.0,
-                          ), // Favorite icon
-                          onPressed: () {
-                            // Handle favorite action here
-                            isLiked
-                                ? removeLike(
-                                    widget.userDetails['uid'],
-                                    widget.details['t_id'],
-                                  )
-                                : addLike(
-                                    widget.userDetails['uid'],
-                                    widget.details['t_id'],
-                                  );
-                          },
-                        ),
+                  Positioned(
+                    left: 25.0,
+                    top: 40.0,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(
+                        30.0,
                       ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20.0,
-                    vertical: 20.0,
-                  ),
-                  child: ListView(
-                    // crossAxisAlignment: CrossAxisAlignment.start,
-                    // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    padding: EdgeInsets.zero,
-                    children: [
-                      Text(
-                        widget.details['name'],
-                        style: TextStyle(
-                          color: primaryColor,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      Text(
-                        widget.details['address'],
-                        style: TextStyle(
-                          color: greenColor,
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Text(
-                        "Description",
-                        style: TextStyle(
-                          color: primaryColor,
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      Text(
-                        widget.details['desc'],
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 14.0,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Text(
-                        "Timings",
-                        style: TextStyle(
-                          color: primaryColor,
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      Container(
-                        // width: 20.0,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(
-                            12.0,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 8.0,
-                            horizontal: 12.0,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                widget.details['startTime'] +
-                                    " - " +
-                                    widget.details['endTime'],
-                                style: TextStyle(
-                                  color: primaryColor,
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                      child: BackdropFilter(
+                        filter:
+                            new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                        child: Container(
+                          // backgroundColor: whiteColor,
+                          decoration: BoxDecoration(
+                            color: primaryColor.withOpacity(0.45),
+                            borderRadius: BorderRadius.circular(50.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: primaryColor.withOpacity(0.25),
+                                spreadRadius: 2,
+                                blurRadius: 7,
+                                offset:
+                                    Offset(0, 2), // changes position of shadow
                               ),
-                              BookingWidget(widget.details['amtPerHour']),
                             ],
                           ),
+                          // radius: 25.0,
+                          child: IconButton(
+                            splashRadius: 35.0,
+                            // color: Colors.red,
+                            icon: Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              color: whiteColor,
+                              size: 20.0,
+                            ), // Favorite icon
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: 25.0,
+                    bottom: 20.0,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(
+                        30.0,
+                      ),
+                      child: BackdropFilter(
+                        filter:
+                            new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                        child: Container(
+                          // backgroundColor: whiteColor,
+                          decoration: BoxDecoration(
+                            color: isLiked
+                                ? whiteColor
+                                : primaryColor.withOpacity(0.45),
+                            borderRadius: BorderRadius.circular(50.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: primaryColor.withOpacity(0.25),
+                                spreadRadius: 2,
+                                blurRadius: 7,
+                                offset:
+                                    Offset(0, 2), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                          // radius: 25.0,
+                          child: IconButton(
+                            splashRadius: 35.0,
+                            // color: Colors.red,
+                            icon: FUI(
+                              isLiked
+                                  ? SolidRounded.HEART
+                                  : RegularRounded.HEART,
+                              width: 25.0,
+                              height: 25.0,
+                              color: isLiked ? greenColor : whiteColor,
+                            ),
+
+                            onPressed: () {
+                              // Handle favorite action here
+                              isLiked
+                                  ? removeLike(
+                                      widget.userDetails['uid'],
+                                      widget.details['t_id'],
+                                    )
+                                  : addLike(
+                                      widget.userDetails['uid'],
+                                      widget.details['t_id'],
+                                    );
+                              HapticFeedback.mediumImpact();
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 20.0,
+                      right: 20.0,
+                      top: 20.0,
+                    ),
+                    child: ListView(
+                      // crossAxisAlignment: CrossAxisAlignment.start,
+                      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      padding: EdgeInsets.zero,
+                      children: [
+                        Text(
+                          widget.details['name'],
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 5.0,
+                        ),
+                        Text(
+                          widget.details['address'],
+                          style: TextStyle(
+                            color: greenColor,
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15.0,
+                        ),
+                        Text(
+                          "Description",
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 5.0,
+                        ),
+                        Text(
+                          widget.details['desc'],
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14.0,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15.0,
+                        ),
+                        Text(
+                          "Dimensions",
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 5.0,
+                        ),
+                        Text(
+                          widget.details['breadth'].toString() +
+                              " m X " +
+                              widget.details['length'].toString() +
+                              " m",
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14.0,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15.0,
+                        ),
+                        Text(
+                          "Sides",
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 5.0,
+                        ),
+                        Text(
+                          widget.details['side'].toString() + "s",
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14.0,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15.0,
+                        ),
+                        Text(
+                          "Timings",
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 5.0,
+                        ),
+                        Container(
+                          // width: 20.0,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(
+                              12.0,
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 6.0,
+                              horizontal: 8.0,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  widget.details['startTime'] +
+                                      " - " +
+                                      widget.details['endTime'],
+                                  style: TextStyle(
+                                    color: primaryColor,
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                BookingWidget(widget.details['amtPerHour']),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15.0,
+                        ),
+                        // Text(
+                        //   "₹ " + widget.details['amtPerHour'].toString(),
+                        //   style: TextStyle(
+                        //     color: primaryColor,
+                        //     fontSize: 20.0,
+                        //     fontWeight: FontWeight.w700,
+                        //   ),
+                        // ),
+                        // Text(
+                        //   "per hour",
+                        //   style: TextStyle(
+                        //     color: greyColor,
+                        //     fontSize: 14.0,
+                        //     fontWeight: FontWeight.w500,
+                        //   ),
+                        // ),
+                        // BookingWidget(widget.details['amtPerHour']),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                color: Colors.grey[200],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 20.0,
+                    horizontal: 15.0,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Row(
+                          children: [
+                            IconButton(
+                              style: IconButton.styleFrom(
+                                  padding: EdgeInsets.all(
+                                    8.0,
+                                  ),
+                                  backgroundColor: whiteColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  )),
+                              onPressed: () {
+                                // Navigator.push(context,
+                                //     MaterialPageRoute(builder: (context) {
+                                //   return SuccessfullyBooked();
+                                // }));
+                                launchGoogleMap(10.729448, 79.020248);
+                              },
+                              icon: Padding(
+                                padding: const EdgeInsets.all(2.0),
+                                child: FUI(
+                                  SolidRounded.MARKER,
+                                  width: 25.0,
+                                  height: 25.0,
+                                  color: primaryColor,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 15.0,
+                            ),
+                            IconButton(
+                                style: IconButton.styleFrom(
+                                    padding: EdgeInsets.all(
+                                      8.0,
+                                    ),
+                                    backgroundColor: whiteColor,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    )),
+                                onPressed: () async {
+                                  var url = widget.details['phone'];
+                                  Uri uri = Uri(scheme: "tel", path: url);
+                                  try {
+                                    await launchUrl(uri);
+                                  } catch (error) {
+                                    throw 'Could not launch $url';
+                                  }
+                                },
+                                icon: Padding(
+                                  padding: const EdgeInsets.all(2.0),
+                                  child: FUI(
+                                    SolidRounded.PHONE_CALL,
+                                    width: 25.0,
+                                    height: 25.0,
+                                    color: primaryColor,
+                                  ),
+                                )),
+                          ],
                         ),
                       ),
                       SizedBox(
-                        height: 20.0,
+                        width: 20.0,
                       ),
-                      // Text(
-                      //   "₹ " + widget.details['amtPerHour'].toString(),
-                      //   style: TextStyle(
-                      //     color: primaryColor,
-                      //     fontSize: 20.0,
-                      //     fontWeight: FontWeight.w700,
-                      //   ),
-                      // ),
-                      // Text(
-                      //   "per hour",
-                      //   style: TextStyle(
-                      //     color: greyColor,
-                      //     fontSize: 14.0,
-                      //     fontWeight: FontWeight.w500,
-                      //   ),
-                      // ),
-                      // BookingWidget(widget.details['amtPerHour']),
+                      Expanded(
+                        flex: 4,
+                        child: TextButton(
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.all(12.0),
+                              backgroundColor: greenColor,
+                              // fixedSize: Size(
+                              //   200.0,
+                              //   40.0,
+                              // ),
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                _createRoute(
+                                  BookingScreen(
+                                      widget.details, widget.userDetails),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              "Book Slot",
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w600,
+                                color: whiteColor,
+                              ),
+                            )),
+                      ),
                     ],
                   ),
                 ),
               ),
-            ),
-            Container(
-              color: Colors.grey[200],
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 20.0,
-                  horizontal: 15.0,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: Row(
-                        children: [
-                          IconButton(
-                            style: IconButton.styleFrom(
-                                padding: EdgeInsets.all(
-                                  8.0,
-                                ),
-                                backgroundColor: whiteColor,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                )),
-                            onPressed: () {
-                              // Navigator.push(context,
-                              //     MaterialPageRoute(builder: (context) {
-                              //   return SuccessfullyBooked();
-                              // }));
-                              launchGoogleMap(10.729448, 79.020248);
-                            },
-                            icon: Icon(
-                              Icons.location_on_rounded,
-                              size: 30.0,
-                            ),
-                          ),
-                          SizedBox(
-                            width: 15.0,
-                          ),
-                          IconButton(
-                            style: IconButton.styleFrom(
-                                padding: EdgeInsets.all(
-                                  8.0,
-                                ),
-                                backgroundColor: whiteColor,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                )),
-                            onPressed: () async {
-                              const url = "9791927990";
-                              Uri uri = Uri(scheme: "tel", path: url);
-                              try {
-                                await launchUrl(uri);
-                              } catch (error) {
-                                throw 'Could not launch $url';
-                              }
-                            },
-                            icon: Icon(
-                              Icons.phone_rounded,
-                              size: 30.0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      width: 20.0,
-                    ),
-                    Expanded(
-                      flex: 4,
-                      child: TextButton(
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.all(12.0),
-                            backgroundColor: greenColor,
-                            // fixedSize: Size(
-                            //   200.0,
-                            //   40.0,
-                            // ),
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              _createRoute(
-                                BookingScreen(
-                                    widget.details, widget.userDetails),
-                              ),
-                            );
-                          },
-                          child: Text(
-                            "Book Slot",
-                            style: TextStyle(
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w600,
-                              color: whiteColor,
-                            ),
-                          )),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -522,8 +586,8 @@ class BookingWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Container(
-                height: 10.0,
-                width: 6.0,
+                height: 8.0,
+                width: 5.0,
                 decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.only(
@@ -535,8 +599,8 @@ class BookingWidget extends StatelessWidget {
                 height: 10.0,
               ),
               Container(
-                height: 10.0,
-                width: 6.0,
+                height: 8.0,
+                width: 5.0,
                 decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.only(
@@ -548,7 +612,7 @@ class BookingWidget extends StatelessWidget {
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(4.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -558,7 +622,7 @@ class BookingWidget extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: whiteColor,
-                      fontSize: 18.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -566,7 +630,7 @@ class BookingWidget extends StatelessWidget {
                     "per hour",
                     style: TextStyle(
                       color: whiteColor,
-                      fontSize: 14.0,
+                      fontSize: 13.0,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -579,8 +643,8 @@ class BookingWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Container(
-                height: 10.0,
-                width: 6.0,
+                height: 8.0,
+                width: 5.0,
                 decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.only(
@@ -592,8 +656,8 @@ class BookingWidget extends StatelessWidget {
                 height: 10.0,
               ),
               Container(
-                height: 10.0,
-                width: 6.0,
+                height: 8.0,
+                width: 5.0,
                 decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.only(
@@ -610,15 +674,17 @@ class BookingWidget extends StatelessWidget {
 }
 
 class MyCarouselContainer extends StatefulWidget {
+  MyCarouselContainer(this.imgList);
+  List<dynamic> imgList;
   @override
   _MyCarouselContainerState createState() => _MyCarouselContainerState();
 }
 
 class _MyCarouselContainerState extends State<MyCarouselContainer> {
-  final List<String> imgList = [
-    'images/turf_img.png',
+  final List<String> stdImgList = [
+    'images/turf_img.jpg',
     'images/football.png',
-    'images/tennis_court.png',
+    'images/tennis_court.jpg',
   ];
 
   int _currentIndex = 0; // To keep track of the current index
@@ -635,7 +701,7 @@ class _MyCarouselContainerState extends State<MyCarouselContainer> {
           height: MediaQuery.of(context).size.height / 2.5,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(40.0),
-            color: Colors.white,
+            color: whiteColor,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(40.0),
@@ -656,16 +722,27 @@ class _MyCarouselContainerState extends State<MyCarouselContainer> {
                       });
                     },
                   ),
-                  items: imgList
-                      .map((item) => Container(
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: AssetImage(item),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ))
-                      .toList(),
+                  items: widget.imgList.isEmpty
+                      ? stdImgList
+                          .map((item) => Container(
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image: AssetImage(item),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ))
+                          .toList()
+                      : widget.imgList
+                          .map((item) => Container(
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image: NetworkImage(item),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ))
+                          .toList(),
                 ),
                 Positioned(
                   bottom: 20.0,
@@ -687,7 +764,7 @@ class _MyCarouselContainerState extends State<MyCarouselContainer> {
                           width: (30.0 + 30.0 + 10.0 + 4.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
-                            children: imgList.asMap().entries.map((img) {
+                            children: stdImgList.asMap().entries.map((img) {
                               return GestureDetector(
                                 onTap: () =>
                                     _carouselController.animateToPage(img.key),
