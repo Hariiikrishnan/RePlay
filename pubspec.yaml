@@ -57,6 +57,7 @@ dependencies:
   fui_kit: ^2.0.2
   firebase_app_check: ^0.3.1+7
   flutter_native_splash: ^2.4.4
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:
@@ -184,7 +185,7 @@ flutter_native_splash:
     icon_background_color: "#eeeeee"
 
   # The branding property allows you to specify an image used as branding in the splash screen.
-  #branding: assets/dart.png
+    branding: assets/branding.png
 
   # The image_dark, color_dark, icon_background_color_dark, and branding_dark set values that
   # apply when the device is in dark mode. If they are not specified, the app will use the

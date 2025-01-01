@@ -554,8 +554,9 @@ class _CameraAppState extends State<CameraApp> {
                       child: ClipRect(
                         clipper: _MediaSizeClipper(mediaSize),
                         child: Transform.scale(
-                          scale:
-                              scale - MediaQuery.of(context).size.width / 1600,
+                          scale: scale - 0.17,
+                          // scale:
+                          //     scale - MediaQuery.of(context).size.width / 2000,
                           alignment: Alignment.topCenter,
                           child: CameraPreview(
                             controller,

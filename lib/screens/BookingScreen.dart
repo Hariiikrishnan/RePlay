@@ -160,19 +160,23 @@ class _BookingScreenState extends State<BookingScreen> {
     amount = widget.details['amtPerHour'];
     details = widget.details;
     // startValue = widget.details['startTime'];
-    makeCurrentBefore();
     // startValue = currentTimeStr;
 
     checkAvailablity();
+    makeCurrentBefore();
   }
 
   void makeCurrentBefore() {
     disableEverything = false;
+    print(selectedDate);
+    print(currentDate);
     if (selectedDate == currentDate) {
+      print("Equal Date");
       DateTime curr = DateFormat('h a').parse(currentTimeStr);
       DateTime strt = DateFormat('h a').parse(widget.details['startTime']);
 
       if (curr.isBefore(strt)) {
+        print("Here");
         setState(() {
           startValue = widget.details['startTime'];
         });
@@ -181,6 +185,7 @@ class _BookingScreenState extends State<BookingScreen> {
           endValue = times[startIdx + 1];
         });
       } else {
+        print("No Here");
         List<String> list =
             getTimeList(widget.details['startTime'], widget.details['endTime']);
         String lastItem = list[list.length - 2];
@@ -189,6 +194,7 @@ class _BookingScreenState extends State<BookingScreen> {
 
         if (curr.isAfter(DateFormat('h a').parse(lastItem)) ||
             DateFormat('h a').format(curr) == lastItem) {
+          print("Came Along");
           setState(() {
             startValue = widget.details['startTime'];
           });
@@ -198,6 +204,7 @@ class _BookingScreenState extends State<BookingScreen> {
             disableEverything = true;
             amount = 0;
           });
+          print(amount);
         } else {
           setState(() {
             startValue = DateFormat("h a").format(now.add(
@@ -214,7 +221,7 @@ class _BookingScreenState extends State<BookingScreen> {
       }
       // print(startValue);
     } else {
-      print("not equal");
+      print("not equal date");
       setState(() {
         startValue = widget.details['startTime'];
       });
@@ -236,7 +243,7 @@ class _BookingScreenState extends State<BookingScreen> {
   void checkAvailablity() async {
     // print(selectedDate);
     var state = await isAvailable(selectedDate, startValue, endValue);
-    print(state);
+    // print(state);
     if (state == false) {
       setState(() {
         amount = 0;
@@ -270,8 +277,8 @@ class _BookingScreenState extends State<BookingScreen> {
       endInt += 12; // Convert 12 AM to 0 hours
     }
 
-    print(startInt.toString() + "Start INt");
-    print(endInt.toString() + "End INt");
+    // print(startInt.toString() + "Start INt");
+    // print(endInt.toString() + "End INt");
 
     if (startValue == endValue) {
       setState(() {
@@ -290,9 +297,9 @@ class _BookingScreenState extends State<BookingScreen> {
         });
       } else {
         setState(() {
-          print("chance");
+          // print("chance");
           amount = (endInt - startInt) * widget.details['amtPerHour'] as int;
-          print(amount.toString());
+          // print(amount.toString());
           isTurfAvailable = state;
         });
       }
@@ -1006,12 +1013,12 @@ class _BookingScreenState extends State<BookingScreen> {
       bookedTimes = bookedData.toList();
     });
 
-    print("Booked : $bookedTimes");
+    // print("Booked : $bookedTimes");
 
     // Create intervals for the new booking
     List<String> newBookingIntervals =
         generateTimeRange(newStartTime, newEndTime);
-    print("New Booking: $newBookingIntervals");
+    // print("New Booking: $newBookingIntervals");
 
     // Check for any overlap
     for (String time in newBookingIntervals) {
@@ -1240,7 +1247,7 @@ class _BookingScreenState extends State<BookingScreen> {
         ),
         backgroundColor: whiteColor,
       ),
-      backgroundColor: Colors.grey[300],
+      backgroundColor: whiteColor,
       body: Container(
         color: Colors.grey[300],
         // decoration: BoxDecoration(
@@ -1556,7 +1563,10 @@ class _BookingScreenState extends State<BookingScreen> {
                             ),
                           ),
                           Text(
-                            "Rs. " + (amount > 0 ? amount.toString() : "0"),
+                            "Rs. " +
+                                ((amount > 0 && !disableEverything)
+                                    ? amount.toString()
+                                    : "0"),
                             style: TextStyle(
                               color: greenColor,
                               fontSize: 18.0,
@@ -1569,7 +1579,7 @@ class _BookingScreenState extends State<BookingScreen> {
                         style: TextButton.styleFrom(
                           // enableFeedback: isTurfAvailable,
                           backgroundColor: isTurfAvailable
-                              ? amount > 0
+                              ? (amount > 0 && !disableEverything)
                                   ? (status == 0)
                                       ? greenColor
                                       : status == 3
@@ -1613,7 +1623,7 @@ class _BookingScreenState extends State<BookingScreen> {
                           );
 
                           isTurfAvailable
-                              ? amount > 0
+                              ? (amount > 0 && !disableEverything)
                                   ? showBottomSheet()
                                   : null
                               :

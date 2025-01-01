@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:geolocator/geolocator.dart';
@@ -704,32 +705,35 @@ class NearbyTile extends StatelessWidget {
                         ? AssetImage(
                             "images/turf_img.jpg",
                           )
-                        : Image.network(
+                        : CachedNetworkImageProvider(
                             turfDetails['imgList'][0],
-                            loadingBuilder: (BuildContext context, Widget child,
-                                ImageChunkEvent? loadingProgress) {
-                              if (loadingProgress == null) {
-                                return child; // Image is fully loaded
-                              }
-                              return Skeletonizer(
-                                enabled: true,
-                                enableSwitchAnimation: true,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(16.0),
-                                  child: Container(
-                                    height: double.maxFinite,
-                                    width: 160.0,
-                                    color: greyColor,
-                                  ),
-                                ),
-                              );
-                            },
-                            errorBuilder: (BuildContext context, Object error,
-                                StackTrace? stackTrace) {
-                              return Icon(Icons.error,
-                                  color: Colors.red, size: 50);
-                            },
-                          ).image,
+                          ),
+                    // : Image.network(
+                    //     turfDetails['imgList'][0],
+                    //     loadingBuilder: (BuildContext context, Widget child,
+                    //         ImageChunkEvent? loadingProgress) {
+                    //       if (loadingProgress == null) {
+                    //         return child; // Image is fully loaded
+                    //       }
+                    //       return Skeletonizer(
+                    //         enabled: true,
+                    //         enableSwitchAnimation: true,
+                    //         child: ClipRRect(
+                    //           borderRadius: BorderRadius.circular(16.0),
+                    //           child: Container(
+                    //             height: double.maxFinite,
+                    //             width: 160.0,
+                    //             color: greyColor,
+                    //           ),
+                    //         ),
+                    //       );
+                    //     },
+                    //     errorBuilder: (BuildContext context, Object error,
+                    //         StackTrace? stackTrace) {
+                    //       return Icon(Icons.error,
+                    //           color: Colors.red, size: 50);
+                    //     },
+                    //   ).image,
                   ),
                 ),
               ),

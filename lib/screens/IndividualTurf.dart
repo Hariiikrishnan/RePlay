@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fui_kit/fui_kit.dart';
 import 'package:turf_arena/screens/BookingScreen.dart';
 import 'package:turf_arena/screens/SuccessBook.dart';
@@ -148,7 +149,7 @@ class _IndividualturfState extends State<Individualturf> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: whiteColor,
+      backgroundColor: whiteColor,
       body: SafeArea(
         child: Container(
           // decoration: BoxDecoration(
@@ -737,7 +738,7 @@ class _MyCarouselContainerState extends State<MyCarouselContainer> {
                           .map((item) => Container(
                                 decoration: BoxDecoration(
                                   image: DecorationImage(
-                                    image: NetworkImage(item),
+                                    image: CachedNetworkImageProvider(item),
                                     fit: BoxFit.cover,
                                   ),
                                 ),

@@ -702,7 +702,9 @@ class _RegisterscreenState extends State<Registerscreen> {
                                     fixedSize: Size(100.0, 50.0),
                                     // padding:
                                     // EdgeInsets.symmetric(vertical: 10.0),
-                                    backgroundColor: greenColor,
+                                    backgroundColor: showSpinner
+                                        ? greenColor.withOpacity(0.8)
+                                        : greenColor,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12.0),
                                     )
@@ -712,7 +714,7 @@ class _RegisterscreenState extends State<Registerscreen> {
                                     ? Transform.scale(
                                         scale: 0.7,
                                         child: CircularProgressIndicator(
-                                          color: whiteColor,
+                                          color: whiteColor.withOpacity(0.7),
                                         ),
                                       )
                                     : Text(
@@ -759,7 +761,9 @@ class _RegisterscreenState extends State<Registerscreen> {
                                     fixedSize: Size(100.0, 50.0),
                                     // padding:
                                     // EdgeInsets.symmetric(vertical: 10.0),
-                                    backgroundColor: whiteColor,
+                                    backgroundColor: loadGoogleSign
+                                        ? whiteColor.withOpacity(0.8)
+                                        : whiteColor,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12.0),
                                     )
@@ -769,7 +773,7 @@ class _RegisterscreenState extends State<Registerscreen> {
                                     ? Transform.scale(
                                         scale: 0.7,
                                         child: CircularProgressIndicator(
-                                          color: whiteColor,
+                                          color: greyColor,
                                         ),
                                       )
                                     : Row(

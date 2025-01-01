@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:turf_arena/constants.dart';
@@ -986,8 +987,8 @@ class UpcomingBookingTile extends StatelessWidget {
                         ? AssetImage(
                             "images/turf_img.jpg",
                           )
-                        : AssetImage(
-                            bookedDetails['src'],
+                        : CachedNetworkImageProvider(
+                            bookedDetails['imgList'][0],
                           ),
                   ),
                 ),

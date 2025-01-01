@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:turf_arena/constants.dart';
 import 'package:turf_arena/screens/IndividualTurf.dart';
 import 'package:flutter/cupertino.dart';
@@ -561,36 +562,39 @@ class TurfTile extends StatelessWidget {
                 // width: 150.0,
                 height: 150.0,
                 fit: BoxFit.cover,
-                image: (details['imgList'] == null ||
-                        details['imgList'].isEmpty)
-                    ? AssetImage(
-                        "images/turf_img.jpg",
-                      )
-                    : Image.network(
-                        details['imgList'][0],
-                        loadingBuilder: (BuildContext context, Widget child,
-                            ImageChunkEvent? loadingProgress) {
-                          if (loadingProgress == null) {
-                            return child; // Image is fully loaded
-                          }
-                          return Skeletonizer(
-                            enabled: true,
-                            enableSwitchAnimation: true,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16.0),
-                              child: Container(
-                                height: double.maxFinite,
-                                width: 160.0,
-                                color: greyColor,
-                              ),
-                            ),
-                          );
-                        },
-                        errorBuilder: (BuildContext context, Object error,
-                            StackTrace? stackTrace) {
-                          return Icon(Icons.error, color: Colors.red, size: 50);
-                        },
-                      ).image,
+                image:
+                    (details['imgList'] == null || details['imgList'].isEmpty)
+                        ? AssetImage(
+                            "images/turf_img.jpg",
+                          )
+                        : CachedNetworkImageProvider(
+                            details['imgList'][0],
+                          ),
+                // : Image.network(
+                //     details['imgList'][0],
+                //     loadingBuilder: (BuildContext context, Widget child,
+                //         ImageChunkEvent? loadingProgress) {
+                //       if (loadingProgress == null) {
+                //         return child; // Image is fully loaded
+                //       }
+                //       return Skeletonizer(
+                //         enabled: true,
+                //         enableSwitchAnimation: true,
+                //         child: ClipRRect(
+                //           borderRadius: BorderRadius.circular(16.0),
+                //           child: Container(
+                //             height: double.maxFinite,
+                //             width: 160.0,
+                //             color: greyColor,
+                //           ),
+                //         ),
+                //       );
+                //     },
+                //     errorBuilder: (BuildContext context, Object error,
+                //         StackTrace? stackTrace) {
+                //       return Icon(Icons.error, color: Colors.red, size: 50);
+                //     },
+                //   ).image,
               ),
             ),
             Container(
