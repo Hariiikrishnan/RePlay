@@ -69,7 +69,7 @@ class _MyBookingsState extends State<MyBookings> {
   //       FirebaseFirestore.instance.collection('bookings');
 
   //   Query query = bookings
-  //       .where('u_id', isEqualTo: 'ZdJQ8w3OsoYqQaNxrMyOV2kVbQu1')
+  //       .where('uid', isEqualTo: 'ZdJQ8w3OsoYqQaNxrMyOV2kVbQu1')
   //       .limit(_documentLimit);
 
   //   if (_lastDocument != null) {
@@ -101,7 +101,7 @@ class _MyBookingsState extends State<MyBookings> {
         FirebaseFirestore.instance.collection('bookings');
 
     Query query = bookings
-        .where('u_id', isEqualTo: widget.details['uid'])
+        .where('uid', isEqualTo: widget.details['uid'])
         // .where('paid', isEqualTo: true)
         .where('date', isGreaterThanOrEqualTo: now)
         .orderBy('date')
@@ -139,7 +139,7 @@ class _MyBookingsState extends State<MyBookings> {
         FirebaseFirestore.instance.collection('bookings');
 
     Query query = bookings
-        .where('u_id', isEqualTo: widget.details['uid'])
+        .where('uid', isEqualTo: widget.details['uid'])
         // .where('paid', isEqualTo: true)
         .where('date', isLessThan: now)
         .orderBy('date', descending: true)

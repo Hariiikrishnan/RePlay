@@ -57,36 +57,36 @@ class _SetProfileState extends State<SetProfile> {
     );
   }
 
-  void verifyPhoneNumber() {
-    _auth.verifyPhoneNumber(
-        phoneNumber: "+91 9384926154",
-        timeout: Duration(seconds: 60),
-        verificationCompleted: (phoneCredential) {
-          print(phoneCredential);
-        },
-        verificationFailed: (error) {
-          print(error.toString());
-          setState(() {
-            isError = true;
-          });
-        },
-        codeSent: (verificationId, forceResending) {
-          print(verificationId);
-          Navigator.of(context).push(_createRoute(
-            Otpscreen(
-              verificationId: verificationId,
-              userData: widget.userData,
-              phoneNo: phoneController.text,
-              cameras: widget.cameras,
-              alt: widget.alt,
-              // url: downloadUrl,
-            ),
-          ));
-        },
-        codeAutoRetrievalTimeout: (verificationId) {
-          print("Auto Retrieval Timeout");
-        });
-  }
+  // void verifyPhoneNumber() {
+  //   _auth.verifyPhoneNumber(
+  //       phoneNumber: "+91 9384926154",
+  //       timeout: Duration(seconds: 60),
+  //       verificationCompleted: (phoneCredential) {
+  //         print(phoneCredential);
+  //       },
+  //       verificationFailed: (error) {
+  //         print(error.toString());
+  //         setState(() {
+  //           isError = true;
+  //         });
+  //       },
+  //       codeSent: (verificationId, forceResending) {
+  //         print(verificationId);
+  //         Navigator.of(context).push(_createRoute(
+  //           Otpscreen(
+  //             verificationId: verificationId,
+  //             userData: widget.userData,
+  //             phoneNo: phoneController.text,
+  //             cameras: widget.cameras,
+  //             alt: widget.alt,
+  //             // url: downloadUrl,
+  //           ),
+  //         ));
+  //       },
+  //       codeAutoRetrievalTimeout: (verificationId) {
+  //         print("Auto Retrieval Timeout");
+  //       });
+  // }
 
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController otpController = TextEditingController();
@@ -94,47 +94,47 @@ class _SetProfileState extends State<SetProfile> {
   String? _verificationId;
   var downloadUrl;
 
-  void _sendOtp() async {
-    await _auth.verifyPhoneNumber(
-      phoneNumber: phoneController.text,
-      timeout: const Duration(seconds: 60),
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        // Auto sign-in if verification is successful
-        await _auth.signInWithCredential(credential);
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        print("Verification Failed: ${e.message}");
-        setState(() {
-          isError = true;
-        });
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        setState(() {
-          _verificationId = verificationId;
-        });
-        print("Code sent to phone number.");
-        Navigator.of(context).push(_createRoute(
-          Otpscreen(
-            verificationId: verificationId,
-            userData: widget.userData,
-            phoneNo: phoneController.text,
-            cameras: widget.cameras,
-            alt: widget.alt,
-            // url: downloadUrl,
-          ),
-        ));
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {
-        setState(() {
-          _verificationId = verificationId;
-        });
-        print("Auto retrieval timeout.");
-      },
-    );
-    setState(() {
-      showSpinner = false;
-    });
-  }
+  // void _sendOtp() async {
+  //   await _auth.verifyPhoneNumber(
+  //     phoneNumber: phoneController.text,
+  //     timeout: const Duration(seconds: 60),
+  //     verificationCompleted: (PhoneAuthCredential credential) async {
+  //       // Auto sign-in if verification is successful
+  //       await _auth.signInWithCredential(credential);
+  //     },
+  //     verificationFailed: (FirebaseAuthException e) {
+  //       print("Verification Failed: ${e.message}");
+  //       setState(() {
+  //         isError = true;
+  //       });
+  //     },
+  //     codeSent: (String verificationId, int? resendToken) {
+  //       setState(() {
+  //         _verificationId = verificationId;
+  //       });
+  //       print("Code sent to phone number.");
+  //       Navigator.of(context).push(_createRoute(
+  //         Otpscreen(
+  //           verificationId: verificationId,
+  //           userData: widget.userData,
+  //           phoneNo: phoneController.text,
+  //           cameras: widget.cameras,
+  //           alt: widget.alt,
+  //           // url: downloadUrl,
+  //         ),
+  //       ));
+  //     },
+  //     codeAutoRetrievalTimeout: (String verificationId) {
+  //       setState(() {
+  //         _verificationId = verificationId;
+  //       });
+  //       print("Auto retrieval timeout.");
+  //     },
+  //   );
+  //   setState(() {
+  //     showSpinner = false;
+  //   });
+  // }
 
   void _verifyOtp(otp) async {
     String otp = otpController.text.trim();

@@ -41,7 +41,7 @@ class _UpcomingListState extends State<UpcomingList> {
   //       FirebaseFirestore.instance.collection('bookings');
 
   //   Query query = bookings
-  //       .where('u_id', isEqualTo: widget.userDetails['uid'])
+  //       .where('uid', isEqualTo: widget.userDetails['uid'])
   //       // .where('paid', isEqualTo: true)
   //       .where('date', isGreaterThanOrEqualTo: now)
   //       .orderBy('date')
@@ -106,7 +106,7 @@ class _UpcomingListState extends State<UpcomingList> {
     CollectionReference bookings =
         FirebaseFirestore.instance.collection('bookings');
     Query query = bookings
-        .where('u_id', isEqualTo: widget.userDetails['uid'])
+        .where('uid', isEqualTo: widget.userDetails['uid'])
         // .where('paid', isEqualTo: true)
         .where('date', isGreaterThanOrEqualTo: now)
         .orderBy('date')

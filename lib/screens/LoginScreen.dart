@@ -177,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // setState(() {
       // loadingData = false;
       // _isLoading = false;
-      // print(snapshot.docs);
+      print(snapshot.docs);
       if (snapshot.docs.isEmpty) {
         setState(() {
           isLoaded = false;
@@ -578,20 +578,42 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                               ),
                               SizedBox(
-                                height: 30.0,
+                                height: 20.0,
                               ),
-                              Center(
-                                child: Text(
-                                  "Or Continue With",
-                                  style: TextStyle(
-                                    color: Colors.grey[200],
-                                    fontSize: 15.0,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                              Container(
+                                height: 20.0, // Adjust as needed for spacing
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        height: 1.5,
+                                        color: Colors.white54,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 8.0),
+                                      child: Text(
+                                        "Or Continue With",
+                                        style: TextStyle(
+                                          color: Colors
+                                              .white70, // Adjust to match your desired color
+                                          fontSize: 14.0,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        height: 1.5,
+                                        color: Colors.white54,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               SizedBox(
-                                height: 5.0,
+                                height: 10.0,
                               ),
                               TextButton(
                                 onPressed: () async {
@@ -621,7 +643,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ? Transform.scale(
                                         scale: 0.7,
                                         child: CircularProgressIndicator(
-                                          color: greyColor,
+                                          color: Colors.grey[200],
                                         ),
                                       )
                                     : isLoaded
@@ -653,31 +675,27 @@ class _LoginScreenState extends State<LoginScreen> {
                                             ],
                                           ),
                               ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pushReplacement(
-                                    _createRoute(
-                                      Registerscreen(
-                                        cameras: widget.cameras,
-                                        alt: widget.alt,
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).pushReplacement(
+                                      _createRoute(
+                                        Registerscreen(
+                                          cameras: widget.cameras,
+                                          alt: widget.alt,
+                                        ),
                                       ),
+                                    );
+                                  },
+                                  child: Text(
+                                    "Don't have an Account?",
+                                    style: TextStyle(
+                                      color: whiteColor,
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.w700,
                                     ),
-                                  );
-                                },
-                                style: TextButton.styleFrom(
-                                    padding:
-                                        EdgeInsets.symmetric(vertical: 15.0),
-                                    // backgroundColor: secondaryColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12.0),
-                                    )
-                                    // fixedSize: Size(double.infinity, 50.0),
-                                    ),
-                                child: Text(
-                                  "Don't have an Account?",
-                                  style: TextStyle(
-                                    color: whiteColor,
-                                    fontSize: 14.0,
+                                    textAlign: TextAlign.center,
                                   ),
                                 ),
                               ),

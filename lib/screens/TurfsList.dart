@@ -54,7 +54,7 @@ class _TurfsListState extends State<TurfsList> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    // print(widget.userDetails['u_id']);
+    // print(widget.userDetails['uid']);
     print(loadingData);
 
     _scrollController.addListener(() {

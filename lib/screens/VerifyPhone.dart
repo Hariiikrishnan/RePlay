@@ -74,78 +74,79 @@ class _VerifyPhoneState extends State<VerifyPhone> {
 
   String? _verificationId;
 
-  void _sendOtp() async {
-    setState(() {
-      showSpinner = true;
-    });
-    await _auth.verifyPhoneNumber(
-      phoneNumber: phoneController.text,
-      timeout: const Duration(seconds: 60),
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        // Auto sign-in if verification is successful
-        await _auth.signInWithCredential(credential);
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        print("Verification Failed: ${e.message}");
-        setState(() {
-          isError = true;
-          showSpinner = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-                30.0,
-              ),
-            ),
-            margin: EdgeInsets.symmetric(
-              horizontal: 5.0,
-              vertical: 5.0,
-            ),
-            padding: EdgeInsets.symmetric(
-              horizontal: 30.0,
-              vertical: 5.0,
-            ),
-            elevation: 50.0,
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.red[400],
-            showCloseIcon: true,
-            closeIconColor: whiteColor,
-            content: Text(
-              "Error Occured. Try Again!",
-              style: TextStyle(
-                fontSize: 17.0,
-              ),
-            ),
-          ),
-        );
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        setState(() {
-          _verificationId = verificationId;
-          showSpinner = false;
-        });
-        print("Code sent to phone number.");
-        Navigator.of(context).pushReplacement(_createRoute(
-          Otpscreen(
-            verificationId: verificationId,
-            userData: widget.userData,
-            phoneNo: phoneController.text,
-            cameras: [],
-            alt: "",
-            // url: downloadUrl,
-          ),
-        ));
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {
-        setState(() {
-          _verificationId = verificationId;
-          showSpinner = false;
-        });
-        print("Auto retrieval timeout.");
-      },
-    );
-  }
+  // void _sendOtp() async {
+  //   setState(() {
+  //     showSpinner = true;
+  //   });
+  //   await _auth.verifyPhoneNumber(
+  //     phoneNumber: phoneController.text,
+  //     timeout: const Duration(seconds: 60),
+  //     verificationCompleted: (PhoneAuthCredential credential) async {
+  //       // Auto sign-in if verification is successful
+  //       await _auth.signInWithCredential(credential);
+  //     },
+  //     verificationFailed: (FirebaseAuthException e) {
+  //       print("Verification Failed: ${e.message}");
+  //       setState(() {
+  //         isError = true;
+  //         showSpinner = false;
+  //       });
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.circular(
+  //               30.0,
+  //             ),
+  //           ),
+  //           margin: EdgeInsets.symmetric(
+  //             horizontal: 5.0,
+  //             vertical: 5.0,
+  //           ),
+  //           padding: EdgeInsets.symmetric(
+  //             horizontal: 30.0,
+  //             vertical: 5.0,
+  //           ),
+  //           elevation: 50.0,
+  //           behavior: SnackBarBehavior.floating,
+  //           backgroundColor: Colors.red[400],
+  //           showCloseIcon: true,
+  //           closeIconColor: whiteColor,
+  //           content: Text(
+  //             "Error Occured. Try Again!",
+  //             style: TextStyle(
+  //               fontSize: 17.0,
+  //             ),
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //     codeSent: (String verificationId, int? resendToken) {
+  //       setState(() {
+  //         _verificationId = verificationId;
+  //         showSpinner = false;
+  //       });
+  //       print("Code sent to phone number.");
+  //       Navigator.of(context).pushReplacement(_createRoute(
+  //         Otpscreen(
+  //           verificationId: verificationId,
+  //           userData: widget.userData,
+  //           phoneNo: phoneController.text,
+  //           cameras: [],
+  //           alt: "",
+
+  //           // url: downloadUrl,
+  //         ),
+  //       ));
+  //     },
+  //     codeAutoRetrievalTimeout: (String verificationId) {
+  //       setState(() {
+  //         _verificationId = verificationId;
+  //         showSpinner = false;
+  //       });
+  //       print("Auto retrieval timeout.");
+  //     },
+  //   );
+  // }
 
   void _verifyOtp(otp) async {
     String otp = otpController.text.trim();
@@ -217,7 +218,7 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                   ),
                 ),
                 onPressed: () async {
-                  !showSpinner ? _sendOtp() : null;
+                  // !showSpinner ? _sendOtp() : null;
                   // print(downloadUrl);
                   // Navigator.of(context).push(_createRoute(
                   //   Otpscreen(

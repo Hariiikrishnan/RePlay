@@ -40,35 +40,12 @@ class _AppState extends State<App> {
     super.initState();
     // _initUniLinks();
     print(widget.userDetails);
+    // if (widget.alt == "0.0,0.0") {
+    //   showAlertDialog(context);
+    // }
   }
 
   File? _image;
-  // Future<void> _initUniLinks() async {
-  //   // Listen for incoming links
-  //   _sub = uriLinkStream.listen((Uri? uri) {
-  //     if (uri != null) {
-  //       _handleIncomingLink(uri);
-  //     }
-  //   }, onError: (Object err) {
-  //     // Handle exception by warning the user their action did not succeed
-  //     print('Error: $err');
-  //   });
-
-  //   // Handle app being opened with a link initially
-  //   final initialUri = await getInitialUri();
-  //   if (initialUri != null) {
-  //     _handleIncomingLink(initialUri);
-  //   }
-  // }
-
-  // void _handleIncomingLink(Uri uri) {
-  //   // Handle the deep link
-  //   print('Received link: ${uri.toString()}');
-  //   Navigator.push(context, MaterialPageRoute(builder: (context) {
-  //     return AcceptInviteScreen(uri.toString());
-  //   }));
-  //   // Navigate to a specific page or perform any action based on the link
-  // }
 
   @override
   void dispose() {
@@ -222,37 +199,16 @@ class _AppState extends State<App> {
                 scale: 1.2,
                 child: GestureDetector(
                   onTap: () {
-                    print("Call Camera");
-                    // final image = await ImagePicker().pickImage(
-                    //   source: ImageSource.camera,
-                    //   maxHeight: 640,
-                    //   maxWidth: 640,
-                    // );
-                    // if (image != null) {
-                    //   setState(() {
-                    //     _image = File(image.path);
-                    //   });
-                    // }
                     Navigator.of(context).push(_createRoute(CameraApp(
                         cameras: widget.cameras,
                         userData: widget.userDetails)));
                   },
                   child: Container(
-                    // transform: Matrix4.translation(1),
-
                     decoration: BoxDecoration(
-                      // border: BoxBorder.lerp(a, b, t),
                       border: Border.all(
                         color: Colors.white,
                         width: 2.5,
                       ),
-                      // image: DecorationImage(
-                      //   fit: BoxFit.fitWidth,
-                      //   image: AssetImage(
-                      //     "images/cock.jpg",
-                      //   ),
-                      // ),
-                      // color: greenColor,
                       gradient: LinearGradient(
                         colors: [
                           Color(0XFF0ccda3),
@@ -275,7 +231,6 @@ class _AppState extends State<App> {
                         ),
                       ],
                     ),
-
                     height: 60.0,
                     width: 60.0,
                     child: Padding(
@@ -294,11 +249,6 @@ class _AppState extends State<App> {
           ],
         ),
         body: [
-          // Center(
-          //   child: Container(
-          //     child: Text("1"),
-          //   ),
-          // ),
           HomeScreen(widget.userDetails, widget.alt),
           MyBookings(widget.userDetails),
           TurfsList("Favorites", widget.userDetails),
@@ -306,98 +256,6 @@ class _AppState extends State<App> {
         ][currentPageIndex]);
   }
 }
-
-// class _HomeScreenState extends State<HomeScreen> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Column(
-//         mainAxisAlignment: MainAxisAlignment.end,
-//         // margin: EdgeInsets.symmetric(
-//         //   vertical: 50.0,
-//         // ),
-//         children: [
-//           BottomNavigationBar(
-//             backgroundColor: Colors.transparent,
-//             showUnselectedLabels: true,
-//             type: BottomNavigationBarType.fixed,
-//             elevation: 0,
-//             items: [
-//               BottomNavigationBarItem(
-//                 backgroundColor: Colors.red,
-//                 icon: Icon(Icons.home),
-//                 label: '',
-//               ),
-//               BottomNavigationBarItem(
-//                 icon: Icon(Icons.local_activity),
-//                 label: '',
-//               ),
-//               BottomNavigationBarItem(
-//                 icon: Container(
-//                   decoration: BoxDecoration(
-//                     color: Colors.black,
-//                   ),
-//                   height: 100.0,
-//                   width: 50.0,
-//                   child: ModelViewer(
-//                     disableTap: false,
-//                     // backgroundColor: Color.fromARGB(0xFF, 0xEE, 0xEE, 0xEE),
-//                     src: 'assets/football.glb',
-//                     alt: 'A 3D model of an astronaut',
-//                     ar: false,
-//                     autoRotate: false,
-
-//                     // iosSrc: 'https://modelviewer.dev/shared-assets/models/Astronaut.usdz',
-//                     disableZoom: true,
-//                   ),
-//                 ),
-//                 label: '',
-//               ),
-//               BottomNavigationBarItem(
-//                 icon: Icon(Icons.inbox),
-//                 label: '',
-//               ),
-//               BottomNavigationBarItem(
-//                 icon: Icon(Icons.person),
-//                 label: '',
-//               ),
-//             ],
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-// Container(
-//               height: 170.0,
-//               color: Colors.red,
-//               child: Padding(
-//                 padding: const EdgeInsets.all(20.0),
-//                 child: Container(
-//                   decoration: BoxDecoration(
-//                       color: Colors.black,
-//                       borderRadius: BorderRadius.circular(80.0)),
-//                   height: 100.0,
-//                   width: 100.0,
-//                   child: ModelViewer(
-//                     disableTap: true,
-//                     // backgroundColor: Color.fromARGB(0xFF, 0xEE, 0xEE, 0xEE),
-//                     src: 'assets/football.glb',
-//                     alt: 'A 3D model of an astronaut',
-//                     ar: false,
-//                     autoRotate: false,
-//                     autoPlay: false,
-//                     disablePan: true,
-
-//                     // iosSrc: 'https://modelviewer.dev/shared-assets/models/Astronaut.usdz',
-//                     disableZoom: true,
-//                   ),
-//                 ),
-//               ),
-//             ),
-
-// late List<CameraDescription> _cameras;
 
 /// CameraApp is the Main Application.
 
@@ -460,21 +318,6 @@ class _CameraAppState extends State<CameraApp> {
     });
     // initialization();
   }
-
-  // void initialization() async {
-  //   // This is where you can initialize the resources needed by your app while
-  //   // the splash screen is displayed.  Remove the following example because
-  //   // delaying the user experience is a bad design practice!
-  //   // ignore_for_file: avoid_print
-  //   print('ready in 3...');
-  //   await Future.delayed(const Duration(seconds: 1));
-  //   print('ready in 2...');
-  //   await Future.delayed(const Duration(seconds: 1));
-  //   print('ready in 1...');
-  //   await Future.delayed(const Duration(seconds: 1));
-  //   print('go!');
-  //   FlutterNativeSplash.remove();
-  // }
 
   @override
   void dispose() {

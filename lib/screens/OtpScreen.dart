@@ -15,13 +15,15 @@ class Otpscreen extends StatefulWidget {
     required this.phoneNo,
     required this.cameras,
     required this.alt,
+    required this.user,
   });
 
-  Map<dynamic, dynamic> userData;
+  Map<String, dynamic> userData;
   final String verificationId;
   String phoneNo;
   final List<CameraDescription> cameras;
   final String alt;
+  User user;
   // String url;
   @override
   State<Otpscreen> createState() => _OtpscreenState();
@@ -88,7 +90,7 @@ class _OtpscreenState extends State<Otpscreen> {
       Navigator.push(context, MaterialPageRoute(builder: (context) {
         return App(
           {
-            'u_id': user.uid,
+            'uid': user.uid,
             'username': user.displayName,
             'email': user.email,
           },
@@ -141,21 +143,56 @@ class _OtpscreenState extends State<Otpscreen> {
 
   Future<void> addUserToFirestore(User user) async {
     try {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      if (!userDoc.exists) {
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      setState(() {
+        widget.userData = {
           'uid': user.uid,
           'email': user.email,
-          'displayName': user.displayName ?? '',
-          'photoURL': user.photoURL ?? '',
-        });
-      }
+          'isAdmin': false,
+          'liked': [],
+          'moments': [],
+          'phone': widget.phoneNo,
+        };
+      });
+
+      // print(userData);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .set(widget.userData);
     } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(snackBar("Error Occured. Try Again!"));
       print('Error adding user to Firestore: $e');
     }
+  }
+
+  SnackBar snackBar(String msg) {
+    return SnackBar(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+        30.0,
+      )),
+      margin: EdgeInsets.symmetric(
+        horizontal: 5.0,
+        vertical: 5.0,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: 30.0,
+        vertical: 5.0,
+      ),
+      elevation: 50.0,
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: Colors.red[400],
+      showCloseIcon: true,
+      closeIconColor: whiteColor,
+      content: Text(
+        msg,
+        style: TextStyle(
+          fontSize: 17.0,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
   }
 
   @override
@@ -252,6 +289,8 @@ class _OtpscreenState extends State<Otpscreen> {
           ),
         ),
       );
+      await addUserToFirestore(widget.user);
+
       // Navigate to next screen
       Navigator.of(context).pushReplacement(
         _createRoute(

@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:fui_kit/fui_kit.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:turf_arena/screens/BookingScreen.dart';
@@ -59,29 +60,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       print(widget.alt);
-      HttpsCallable callable =
-          FirebaseFunctions.instance.httpsCallable("getNearby");
-      dynamic response = await callable.call({
-        // 'alt': "10.897774, 79.022481",
-        'alt': widget.alt,
-      });
-      print(response.data);
-      print(response.data['results'].length);
-      if (response.data['results'].length > 0) {
-        setState(() {
-          respData = response.data;
-          loadingNearby = false;
+      if (widget.alt != "0.0,0.0") {
+        HttpsCallable callable =
+            FirebaseFunctions.instance.httpsCallable("getNearby");
+        dynamic response = await callable.call({
+          // 'alt': "10.897774, 79.022481",
+          'alt': widget.alt,
         });
-        print(respData);
-        print(respData['results'].length);
+        print(response.data);
+        print(response.data['results'].length);
+        if (response.data['results'].length > 0) {
+          setState(() {
+            respData = response.data;
+            loadingNearby = false;
+          });
+          print(respData);
+          print(respData['results'].length);
+        } else {
+          setState(() {
+            isEmpty = true;
+            loadingNearby = false;
+          });
+        }
+
+        !isEmpty ? getNearbyTurfs() : null;
       } else {
         setState(() {
-          isEmpty = true;
+          print("No access");
           loadingNearby = false;
+          isNoAccess = true;
         });
+        // showAlertDialog(context);
       }
-
-      !isEmpty ? getNearbyTurfs() : null;
     } on FirebaseFunctionsException catch (e) {
       // Do clever things with e
       print(e.toString());
@@ -97,6 +107,70 @@ class _HomeScreenState extends State<HomeScreen> {
         loadingData = false;
       });
     }
+  }
+
+  showAlertDialog(BuildContext context) {
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: Text(
+        "OK",
+        style: TextStyle(
+          color: whiteColor,
+        ),
+      ),
+      style: TextButton.styleFrom(
+        backgroundColor: Colors.red,
+        fixedSize: Size(75.0, 40.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            12.0,
+          ),
+        ),
+      ),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+    Widget continueButton = TextButton(
+      child: Text(
+        "Continue",
+        style: TextStyle(
+          color: whiteColor,
+        ),
+      ),
+      style: TextButton.styleFrom(
+        backgroundColor: greenColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            12.0,
+          ),
+        ),
+      ),
+      onPressed: () {},
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      backgroundColor: whiteColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      title: Text("Reached Limit"),
+      content: Text(
+          "You've reached the 4 Moments Limit.If you want to proceed further kindly delete one saved moment."),
+      actions: [
+        cancelButton,
+        // continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   void getNearbyTurfs() {
@@ -150,6 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool loadingNearby = true;
   bool loadingData = true;
   bool isEmpty = false;
+  bool isNoAccess = false;
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   // List<DocumentSnapshot> _documents = [];
@@ -381,7 +456,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                       GestureDetector(
                                         onTap: () {
-                                          loadingNearby
+                                          (loadingNearby || isNoAccess)
                                               ? null
                                               : isEmpty
                                                   ? null
@@ -397,7 +472,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         child: Text(
                                           "See All",
                                           style: TextStyle(
-                                            color: loadingNearby
+                                            color: (loadingNearby || isNoAccess)
                                                 ? greyColor
                                                 : isEmpty
                                                     ? greyColor
@@ -436,22 +511,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ],
                                         ),
                                       )
-                                    : isEmpty
+                                    : isNoAccess
                                         ? Container(
-                                            height: 150.0,
+                                            height: 120.0,
                                             width: double.infinity,
                                             child: Column(
                                               children: [
                                                 Expanded(
                                                   flex: 3,
-                                                  child: Image.asset(
-                                                    "images/noturfs.gif",
+                                                  child: FUI(
+                                                    RegularRounded
+                                                        .MAP_MARKER_CROSS,
+                                                    height: 75.0,
                                                   ),
                                                 ),
                                                 Expanded(
-                                                  flex: 1,
+                                                  flex: 2,
                                                   child: Text(
-                                                    "No nearby turfs found.",
+                                                    "Kindly enable location access and try again.",
                                                     style: TextStyle(
                                                       color: primaryColor,
                                                       fontSize: 16.0,
@@ -461,32 +538,58 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ],
                                             ),
                                           )
-                                        : ListView.builder(
-                                            // controller: _scrollController,
-                                            scrollDirection: Axis.horizontal,
-                                            physics:
-                                                AlwaysScrollableScrollPhysics(),
-                                            itemCount: loadingNearby
-                                                ? nearbyList.length + 1
-                                                : nearbyList.length,
-                                            itemBuilder: (context, index) {
-                                              // if (index < nearbyList.length) {
-                                              //   // Replace with your booking item widget
-                                              return NearbyTile(
-                                                  nearbyList[index],
-                                                  widget.userDetails);
-                                              // } else if (loadingNearby) {
-                                              //   return Skeletonizer(
-                                              //     enabled: true,
-                                              //     enableSwitchAnimation: true,
-                                              //     child: NearbyTile({
-                                              //       'name': "Lorem Ipsum",
-                                              //       'src': 'images/turf_img.jpg',
-                                              //     }, widget.userDetails),
-                                              //   );
-                                              // }
-                                            },
-                                          ),
+                                        : isEmpty
+                                            ? Container(
+                                                height: 150.0,
+                                                width: double.infinity,
+                                                child: Column(
+                                                  children: [
+                                                    Expanded(
+                                                      flex: 3,
+                                                      child: Image.asset(
+                                                        "images/noturfs.gif",
+                                                      ),
+                                                    ),
+                                                    Expanded(
+                                                      flex: 1,
+                                                      child: Text(
+                                                        "No nearby turfs found.",
+                                                        style: TextStyle(
+                                                          color: primaryColor,
+                                                          fontSize: 16.0,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                            : ListView.builder(
+                                                // controller: _scrollController,
+                                                scrollDirection:
+                                                    Axis.horizontal,
+                                                physics:
+                                                    AlwaysScrollableScrollPhysics(),
+                                                itemCount: loadingNearby
+                                                    ? nearbyList.length + 1
+                                                    : nearbyList.length,
+                                                itemBuilder: (context, index) {
+                                                  // if (index < nearbyList.length) {
+                                                  //   // Replace with your booking item widget
+                                                  return NearbyTile(
+                                                      nearbyList[index],
+                                                      widget.userDetails);
+                                                  // } else if (loadingNearby) {
+                                                  //   return Skeletonizer(
+                                                  //     enabled: true,
+                                                  //     enableSwitchAnimation: true,
+                                                  //     child: NearbyTile({
+                                                  //       'name': "Lorem Ipsum",
+                                                  //       'src': 'images/turf_img.jpg',
+                                                  //     }, widget.userDetails),
+                                                  //   );
+                                                  // }
+                                                },
+                                              ),
                               ),
                             ],
                           ),

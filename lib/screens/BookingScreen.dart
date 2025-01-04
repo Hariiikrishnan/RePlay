@@ -375,7 +375,7 @@ class _BookingScreenState extends State<BookingScreen> {
       'amount': amount,
       'payment_id': paymentId,
       'to': endValue,
-      'u_id': widget.userDetails['uid'],
+      'uid': widget.userDetails['uid'],
     };
     await bookings.doc().set(newBooking);
   }

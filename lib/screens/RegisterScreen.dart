@@ -90,7 +90,6 @@ class _RegisterscreenState extends State<Registerscreen> {
         style: TextStyle(
           fontSize: 17.0,
         ),
-        textAlign: TextAlign.center,
       ),
     );
   }
@@ -201,18 +200,21 @@ class _RegisterscreenState extends State<Registerscreen> {
     // if (_formKey.currentState!.validate()) {
     // String email = _emailController.text.trim();
     // String password = _passwordController.text.trim();
-    if (email == null || password == null || phoneNumber == null) {
+
+    User? user = await registerWithEmail();
+    if (user != null) {
+      // await addUserToFirestore(user);
+      print('User registered and waiting for Mobile Authentication');
       setState(() {
-        showSpinner = false;
+        userData = {
+          'uid': user.uid,
+          'email': user.email,
+          'isAdmin': false,
+          'liked': [],
+          'moments': [],
+        };
       });
-      ScaffoldMessenger.of(context).showSnackBar(snackBar("Enter All Fields!"));
-    } else {
-      User? user = await registerWithEmail();
-      if (user != null) {
-        await addUserToFirestore(user);
-        print('User registered and added to Firestore');
-        _sendOtp();
-      }
+      _sendOtp(user);
     }
   }
 
@@ -309,39 +311,40 @@ class _RegisterscreenState extends State<Registerscreen> {
   //   }
   // }
 
-  void verifyPhoneNumber() {
-    _auth.verifyPhoneNumber(
-        phoneNumber: "+91 9384926154",
-        timeout: Duration(seconds: 60),
-        verificationCompleted: (phoneCredential) {
-          print(phoneCredential);
-        },
-        verificationFailed: (error) {
-          print(error.toString());
-        },
-        codeSent: (verificationId, forceResending) {
-          print(verificationId);
-          Navigator.of(context).push(_createRoute(
-            Otpscreen(
-              verificationId: verificationId,
-              userData: userData,
-              phoneNo: phoneController.text,
-              cameras: widget.cameras,
-              alt: widget.alt,
-            ),
-          ));
-        },
-        codeAutoRetrievalTimeout: (verificationId) {
-          print("Auto Retrieval Timeout");
-        });
-  }
+  // void verifyPhoneNumber() {
+  //   _auth.verifyPhoneNumber(
+  //       phoneNumber: "+91 9384926154",
+  //       timeout: Duration(seconds: 60),
+  //       verificationCompleted: (phoneCredential) {
+  //         print(phoneCredential);
+  //       },
+  //       verificationFailed: (error) {
+  //         print(error.toString());
+  //       },
+  //       codeSent: (verificationId, forceResending) {
+  //         print(verificationId);
+  //         Navigator.of(context).push(_createRoute(
+  //           Otpscreen(
+  //             verificationId: verificationId,
+  //             userData: userData,
+  //             phoneNo: phoneController.text,
+  //             cameras: widget.cameras,
+  //             alt: widget.alt,
+  //             user: ,
+  //           ),
+  //         ));
+  //       },
+  //       codeAutoRetrievalTimeout: (verificationId) {
+  //         print("Auto Retrieval Timeout");
+  //       });
+  // }
 
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController otpController = TextEditingController();
 
   String? _verificationId;
 
-  void _sendOtp() async {
+  void _sendOtp(User user) async {
     setState(() {
       showSpinner = true;
     });
@@ -400,6 +403,7 @@ class _RegisterscreenState extends State<Registerscreen> {
             phoneNo: phoneNumber!,
             cameras: widget.cameras,
             alt: widget.alt,
+            user: user,
             // url: downloadUrl,
           ),
         ));
@@ -688,15 +692,26 @@ class _RegisterscreenState extends State<Registerscreen> {
                                 onPressed: () async {
                                   print(email);
                                   print(password);
+                                  showSpinner
+                                      ? null
+                                      : setState(() {
+                                          showSpinner = true;
+                                          phoneNumber = "+91" + phoneNumber!;
+                                        });
                                   print(phoneNumber);
-
-                                  setState(() {
-                                    showSpinner = true;
-                                  });
                                   FocusManager.instance.primaryFocus?.unfocus();
-                                  // verifyPhoneNumber();
-                                  // sendEmailVerificationLink(username);
-                                  registerAndAddToFirestore();
+
+                                  if (email == null ||
+                                      password == null ||
+                                      phoneNumber == null) {
+                                    setState(() {
+                                      showSpinner = false;
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        snackBar("Enter All Fields!"));
+                                  } else {
+                                    registerAndAddToFirestore();
+                                  }
                                 },
                                 style: TextButton.styleFrom(
                                     fixedSize: Size(100.0, 50.0),
@@ -728,18 +743,40 @@ class _RegisterscreenState extends State<Registerscreen> {
                               SizedBox(
                                 height: 15.0,
                               ),
-                              Center(
-                                child: Text(
-                                  "Or Continue With",
-                                  style: TextStyle(
-                                    color: Colors.grey[200],
-                                    fontSize: 15.0,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                              Container(
+                                height: 20.0, // Adjust as needed for spacing
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        height: 1.5,
+                                        color: Colors.white54,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 8.0),
+                                      child: Text(
+                                        "Or Continue With",
+                                        style: TextStyle(
+                                          color: Colors
+                                              .white70, // Adjust to match your desired color
+                                          fontSize: 14.0,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        height: 1.5,
+                                        color: Colors.white54,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               SizedBox(
-                                height: 5.0,
+                                height: 10.0,
                               ),
                               TextButton(
                                 onPressed: () async {
@@ -797,31 +834,35 @@ class _RegisterscreenState extends State<Registerscreen> {
                                         ],
                                       ),
                               ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pushReplacement(
-                                    _createRoute(
-                                      LoginScreen(
-                                        cameras: widget.cameras,
-                                        alt: widget.alt,
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).pushReplacement(
+                                      _createRoute(
+                                        LoginScreen(
+                                          cameras: widget.cameras,
+                                          alt: widget.alt,
+                                        ),
                                       ),
+                                    );
+                                  },
+                                  // style: TextButton.styleFrom(
+                                  //     padding:
+                                  //         EdgeInsets.symmetric(vertical: 15.0),
+                                  //     // backgroundColor: secondaryColor,
+                                  //     shape: RoundedRectangleBorder(
+                                  //       borderRadius: BorderRadius.circular(12.0),
+                                  //     )
+                                  //     // fixedSize: Size(double.infinity, 50.0),
+                                  //     ),
+                                  child: Text(
+                                    "Already have an Account?",
+                                    style: TextStyle(
+                                      color: whiteColor,
+                                      fontSize: 14.0,
                                     ),
-                                  );
-                                },
-                                style: TextButton.styleFrom(
-                                    padding:
-                                        EdgeInsets.symmetric(vertical: 15.0),
-                                    // backgroundColor: secondaryColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12.0),
-                                    )
-                                    // fixedSize: Size(double.infinity, 50.0),
-                                    ),
-                                child: Text(
-                                  "Already have an Account?",
-                                  style: TextStyle(
-                                    color: whiteColor,
-                                    fontSize: 14.0,
+                                    textAlign: TextAlign.center,
                                   ),
                                 ),
                               ),

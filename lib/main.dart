@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:turf_arena/constants.dart';
 import 'package:turf_arena/screens/AdminDashBoard.dart';
@@ -35,15 +36,18 @@ void main() async {
   // );
   String alt = await getLocation();
   FlutterNativeSplash.remove();
-  runApp(MyApp(cameras: cameras, alt: alt, userDetails: {
-    'email': prefs.getString('email'),
-    'uid': prefs.getString('uid'),
-    'photoURL': prefs.getString('photoURL'),
-    'liked': prefs.getStringList('liked'),
-    'isAdmin': prefs.getBool('isAdmin'),
-    'moments': prefs.getString('moments'),
-    'displayName': prefs.getString('displayName'),
-  }));
+
+  runApp(
+    MyApp(cameras: cameras, alt: alt, userDetails: {
+      'email': prefs.getString('email'),
+      'uid': prefs.getString('uid'),
+      'photoURL': prefs.getString('photoURL'),
+      'liked': prefs.getStringList('liked'),
+      'isAdmin': prefs.getBool('isAdmin'),
+      'moments': prefs.getString('moments'),
+      'displayName': prefs.getString('displayName'),
+    }),
+  );
 }
 
 Future<String> getLocation() async {
@@ -54,16 +58,23 @@ Future<String> getLocation() async {
     permission = await Geolocator.requestPermission();
     print(permission);
 
-    Position position = await Geolocator.getCurrentPosition(
-        // forceAndroidLocationManager: Platform.isAndroid,
-        desiredAccuracy: LocationAccuracy.best);
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever ||
+        permission == LocationPermission.unableToDetermine) {
+      latitude = 0.0;
+      longitude = 0.0;
+      print("True");
+    } else {
+      Position position = await Geolocator.getCurrentPosition(
+          // forceAndroidLocationManager: Platform.isAndroid,
+          desiredAccuracy: LocationAccuracy.best);
 
-    latitude = position.latitude;
-    longitude = position.longitude;
-
+      latitude = position.latitude;
+      longitude = position.longitude;
+    }
     // getNearby();
   } catch (e) {
-    print(e);
+    print("Error fetching location " + e.toString());
   }
   return latitude.toString() + ',' + longitude.toString();
 }
@@ -73,11 +84,12 @@ Future<String> getLocation() async {
 // }
 
 class MyApp extends StatelessWidget {
-  MyApp(
-      {super.key,
-      required this.cameras,
-      required this.alt,
-      required this.userDetails});
+  MyApp({
+    super.key,
+    required this.cameras,
+    required this.alt,
+    required this.userDetails,
+  });
   final List<CameraDescription> cameras;
   String alt;
   Map userDetails;
