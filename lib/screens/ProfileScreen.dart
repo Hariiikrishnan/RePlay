@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fui_kit/fui_kit.dart';
@@ -82,10 +83,15 @@ class _ProfilescreenState extends State<Profilescreen> {
     super.initState();
     print(widget.details['moments']);
     print(widget.details['moments'].runtimeType);
-    if (widget.details['moments'].runtimeType == String &&
-        widget.details['moments'] != '') {
+    if (widget.details['moments'] is String) {
       print("Coming");
-      widget.details['moments'] = json.decode(widget.details['moments']);
+      // Decode the string into a List<dynamic>, even if it's empty
+      widget.details['moments'] = widget.details['moments'].isEmpty
+          ? [] // If it's an empty string, assign an empty list
+          : json.decode(
+              widget.details['moments']); // Otherwise, decode the string
+    } else {
+      print(widget.details['moments']);
     }
     print(widget.details['moments'].runtimeType);
     // print(widget.details['moments'][0]['time']);
@@ -120,8 +126,8 @@ class _ProfilescreenState extends State<Profilescreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Image(
-                          image: AssetImage(
-                            "images/app_icon.png",
+                          image: CachedNetworkImageProvider(
+                            "https://firebasestorage.googleapis.com/v0/b/turf-arena.firebasestorage.app/o/assets%2Fapp_icon.png?alt=media&token=e90a7941-7676-4273-9dcf-b5f24b0482c5",
                           ),
                           height: 35.0,
                         ),
@@ -132,8 +138,8 @@ class _ProfilescreenState extends State<Profilescreen> {
                       backgroundColor: whiteColor,
                       child: CircleAvatar(
                         radius: 70.0,
-                        backgroundImage:
-                            NetworkImage(widget.details['photoURL']),
+                        backgroundImage: CachedNetworkImageProvider(
+                            widget.details['photoURL']),
                       ),
                     ),
                     Row(
@@ -435,11 +441,9 @@ class _ProfilescreenState extends State<Profilescreen> {
                                                           DateFormat('d - MMM ')
                                                               .format(
                                                             DateTime.parse(widget
-                                                                .details[
-                                                                    'moments']
-                                                                    [index]
-                                                                    ['time']
-                                                                .toString()),
+                                                                        .details[
+                                                                    'moments'][
+                                                                index]['time']),
                                                           ),
                                                       style: TextStyle(
                                                         color: primaryColor,

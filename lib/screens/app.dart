@@ -378,7 +378,7 @@ class _CameraAppState extends State<CameraApp> {
       );
     }
     final mediaSize = MediaQuery.of(context).size;
-    final scale = 1 / (controller.value.aspectRatio * mediaSize.aspectRatio);
+    // final scale = 1 / (controller.value.aspectRatio * mediaSize.aspectRatio);
     return Scaffold(
       body: Container(
         color: primaryColor,
@@ -397,7 +397,7 @@ class _CameraAppState extends State<CameraApp> {
                       child: ClipRect(
                         clipper: _MediaSizeClipper(mediaSize),
                         child: Transform.scale(
-                          scale: scale - 0.17,
+                          scale: 1,
                           // scale:
                           //     scale - MediaQuery.of(context).size.width / 2000,
                           alignment: Alignment.topCenter,

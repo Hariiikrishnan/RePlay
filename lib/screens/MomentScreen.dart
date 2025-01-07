@@ -272,12 +272,12 @@ class _MomentScreenState extends State<MomentScreen> {
                         borderRadius: BorderRadius.circular(16.0),
                         border: Border.all(
                           width: 1.0,
-                          color: Colors.grey[300]!,
+                          color: Colors.grey[400]!,
                         ),
                         gradient: LinearGradient(
                           colors: [
                             greenColor,
-                            Colors.grey[300]!,
+                            Colors.grey[200]!,
                           ],
                           stops: [
                             value,

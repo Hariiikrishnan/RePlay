@@ -440,7 +440,9 @@ class _MyBookingsState extends State<MyBookings> {
                                   if (index < pastList.length) {
                                     // Replace with your booking item widget
                                     return BookingWidget(
-                                        pastList[index], Colors.grey[400]!);
+                                        pastList[index],
+                                        Color.fromARGB(255, 82, 213, 182)
+                                            .withOpacity(0.6));
                                   } else if (_isLoading) {
                                     return Skeletonizer(
                                       enabled: true,
@@ -540,7 +542,7 @@ class BookingWidget extends StatelessWidget {
         child: Container(
           // height: 170.0,
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 82, 213, 182).withOpacity(0.6),
+            color: bgColor,
             // gradient: LinearGradient(
             //   colors: [
             //     Colors.grey[200]!.withOpacity(1),
@@ -985,7 +987,7 @@ class UpcomingBookingTile extends StatelessWidget {
                     // image: AssetImage(turfDetails['src']),
                     image: bookedDetails['src'] == null
                         ? AssetImage(
-                            "images/turf_img.jpg",
+                            "images/grass.jpg",
                           )
                         : CachedNetworkImageProvider(
                             bookedDetails['imgList'][0],

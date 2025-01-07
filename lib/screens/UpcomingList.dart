@@ -378,7 +378,7 @@ class UpcomingBookingTile extends StatelessWidget {
                     // image: AssetImage(turfDetails['src']),
                     image: bookedDetails['src'] == null
                         ? AssetImage(
-                            "images/turf_img.jpg",
+                            "images/grass.jpg",
                           )
                         : CachedNetworkImageProvider(
                             bookedDetails['imgList'][0],

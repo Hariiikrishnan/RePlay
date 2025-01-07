@@ -274,7 +274,7 @@ class TurfTile extends StatelessWidget {
                     fit: BoxFit.cover,
                     image: details['imgList'] == null
                         ? AssetImage(
-                            "images/turf_img.jpg",
+                            "images/grass.jpg",
                           )
                         : NetworkImage(details['imgList'][0]),
                   ),

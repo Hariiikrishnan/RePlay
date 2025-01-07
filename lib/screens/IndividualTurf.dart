@@ -683,9 +683,9 @@ class MyCarouselContainer extends StatefulWidget {
 
 class _MyCarouselContainerState extends State<MyCarouselContainer> {
   final List<String> stdImgList = [
-    'images/turf_img.jpg',
-    'images/football.png',
-    'images/tennis_court.jpg',
+    'https://firebasestorage.googleapis.com/v0/b/turf-arena.firebasestorage.app/o/assets%2Fturf_img.jpg?alt=media&token=2c1e98e6-06f8-4b77-b773-356265546339',
+    'https://firebasestorage.googleapis.com/v0/b/turf-arena.firebasestorage.app/o/assets%2Ftennis_court.jpg?alt=media&token=b75f0e08-c9ed-4e5f-8e0c-0e0db76ca087',
+    'https://firebasestorage.googleapis.com/v0/b/turf-arena.firebasestorage.app/o/assets%2Ffootball.png?alt=media&token=e92a41e4-4f72-4f23-b48d-c27e05a7733f',
   ];
 
   int _currentIndex = 0; // To keep track of the current index

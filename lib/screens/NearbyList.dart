@@ -241,7 +241,7 @@ class _NearbylistState extends State<Nearbylist> {
                                 enableSwitchAnimation: true,
                                 child: NearbyTile({
                                   'name': "Lorem Ipsum",
-                                  'src': 'images/turf_img.jpg',
+                                  'src': 'images/grass.jpg',
                                 }, widget.userDetails),
                               );
                             }
@@ -315,7 +315,7 @@ class NearbyTile extends StatelessWidget {
                     // image: AssetImage(turfDetails['src']),
                     image: turfDetails['imgList'] == null
                         ? AssetImage(
-                            "images/turf_img.jpg",
+                            "images/grass.jpg",
                           )
                         : CachedNetworkImageProvider(
                             turfDetails['imgList'][0],

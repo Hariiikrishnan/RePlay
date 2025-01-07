@@ -12,6 +12,7 @@ import 'package:lindi_sticker_widget/lindi_controller.dart';
 import 'package:lindi_sticker_widget/lindi_sticker_widget.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:turf_arena/constants.dart';
 
 import 'package:share_plus/share_plus.dart';
@@ -32,7 +33,9 @@ class _ShowMomentState extends State<ShowMoment> {
   Uint8List? resultImage;
   bool showSpinner = false;
   bool isSaved = false;
+  bool isNotSaved = false;
   double progress = 0.0;
+  bool loadingImage = true;
 
   @override
   void initState() {
@@ -57,14 +60,28 @@ class _ShowMomentState extends State<ShowMoment> {
           "widgets size: ${lindiController.widgets.length}, current index: $index");
     });
     addSticker();
-    if (widget.userData['moments'].runtimeType == String &&
-        widget.userData['moments'] != '') {
-      widget.userData['moments'] = json.decode(widget.userData['moments']);
+    if (widget.userData['moments'] is String) {
+      print("Coming");
+      // Decode the string into a List<dynamic>, even if it's empty
+      widget.userData['moments'] = widget.userData['moments'].isEmpty
+          ? [] // If it's an empty string, assign an empty list
+          : json.decode(
+              widget.userData['moments']); // Otherwise, decode the string
     }
+    initSharedPref();
   }
 
   addSticker() async {
     await createStickerAndAdd();
+    setState(() {
+      loadingImage = false;
+    });
+  }
+
+  late SharedPreferences prefs;
+
+  void initSharedPref() async {
+    prefs = await SharedPreferences.getInstance();
   }
 
   void showSnackBar(String msg, bool status) {
@@ -191,6 +208,9 @@ class _ShowMomentState extends State<ShowMoment> {
       return downloadUrl;
     } catch (e) {
       print("Error uploading image: $e");
+      setState(() {
+        isNotSaved = true;
+      });
       rethrow;
     }
   }
@@ -202,13 +222,26 @@ class _ShowMomentState extends State<ShowMoment> {
           .doc(widget.userData['uid'])
           .get();
       if (userDoc.exists) {
+        Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
+        print(data['moments'].runtimeType);
+        print(widget.userData['moments'].runtimeType);
         setState(() {
-          // widget.userData['phone'] = widget.phoneNo;
           widget.userData['moments'].add({
             'url': url,
-            'time': DateTime.now(),
+            'time': DateTime.now().toString(),
           });
         });
+        String strJsonString = "";
+        if (widget.userData['moments'] != 0) {
+          strJsonString = json.encode(widget.userData['moments']);
+        }
+
+        prefs.setString('moments', strJsonString);
+// // Ensure the moments are a List<String> before adding to Firestore
+//         if (widget.userData['moments'] is List<dynamic>) {
+//           widget.userData['moments'] =
+//               List<String>.from(widget.userData['moments']);
+//         }
         print(widget.userData);
         await FirebaseFirestore.instance
             .collection('users')
@@ -222,6 +255,9 @@ class _ShowMomentState extends State<ShowMoment> {
         });
       }
     } catch (e) {
+      setState(() {
+        isNotSaved = true;
+      });
       print('Error adding user to Firestore: $e');
     }
   }
@@ -488,9 +524,9 @@ class _ShowMomentState extends State<ShowMoment> {
                 builder: (context, double value, child) {
                   return GestureDetector(
                     onTap: () async {
-                      print(widget.userData['moments'].length.toString() +
-                          "Length");
-                      if (!isSaved) {
+                      if (!isSaved && !loadingImage && !showSpinner) {
+                        print(widget.userData['moments'].length.toString() +
+                            "Length");
                         if (widget.userData['moments'].length < 4) {
                           var url = await uploadProfile();
 
@@ -515,13 +551,25 @@ class _ShowMomentState extends State<ShowMoment> {
                         borderRadius: BorderRadius.circular(16.0),
                         border: Border.all(
                           width: 1.0,
-                          color: Colors.grey[300]!,
+                          color: loadingImage
+                              ? Colors.grey[100]!
+                              : Colors.grey[400]!,
                         ),
                         gradient: LinearGradient(
-                          colors: [
-                            Colors.green,
-                            Colors.grey[300]!,
-                          ],
+                          colors: isNotSaved
+                              ? [
+                                  Colors.red[400]!,
+                                  Colors.red[400]!,
+                                ]
+                              : loadingImage
+                                  ? [
+                                      Colors.grey[100]!,
+                                      Colors.grey[100]!,
+                                    ]
+                                  : [
+                                      Colors.green,
+                                      Colors.grey[200]!,
+                                    ],
                           stops: [
                             value,
                             value
@@ -529,29 +577,39 @@ class _ShowMomentState extends State<ShowMoment> {
                         ),
                       ),
                       alignment: Alignment.center,
-                      child: showSpinner
+                      child: isNotSaved
                           ? Text(
-                              'Uploading',
+                              "Couldn't Save",
                               style: TextStyle(
-                                color: primaryColor,
+                                color: whiteColor,
                                 fontSize: 15,
                               ),
                             )
-                          : isSaved
+                          : showSpinner
                               ? Text(
-                                  'Moment Saved',
-                                  style: TextStyle(
-                                    color: whiteColor,
-                                    fontSize: 15,
-                                  ),
-                                )
-                              : Text(
-                                  'Save Moment',
+                                  'Uploading',
                                   style: TextStyle(
                                     color: primaryColor,
                                     fontSize: 15,
                                   ),
-                                ),
+                                )
+                              : isSaved
+                                  ? Text(
+                                      'Moment Saved',
+                                      style: TextStyle(
+                                        color: whiteColor,
+                                        fontSize: 15,
+                                      ),
+                                    )
+                                  : Text(
+                                      'Save Moment',
+                                      style: TextStyle(
+                                        color: loadingImage
+                                            ? primaryColor.withOpacity(0.4)
+                                            : primaryColor,
+                                        fontSize: 15,
+                                      ),
+                                    ),
                     ),
                   );
                 },

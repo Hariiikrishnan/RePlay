@@ -565,7 +565,7 @@ class TurfTile extends StatelessWidget {
                 image:
                     (details['imgList'] == null || details['imgList'].isEmpty)
                         ? AssetImage(
-                            "images/turf_img.jpg",
+                            "images/grass.jpg",
                           )
                         : CachedNetworkImageProvider(
                             details['imgList'][0],

@@ -201,23 +201,28 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> courtsList = [
     {
       'name': 'Cricket',
-      'src': "images/cricket.png",
+      'src':
+          "https://firebasestorage.googleapis.com/v0/b/turf-arena.firebasestorage.app/o/assets%2Fcricket.png?alt=media&token=922659d1-f406-4a1e-8acf-4867fb0e047a",
     },
     {
       'name': 'Football',
-      'src': "images/football.png",
+      'src':
+          "https://firebasestorage.googleapis.com/v0/b/turf-arena.firebasestorage.app/o/assets%2Ffootball.png?alt=media&token=e92a41e4-4f72-4f23-b48d-c27e05a7733f",
     },
     {
       'name': 'Badminton',
-      'src': "images/badminton_court.jpg",
+      'src':
+          "https://firebasestorage.googleapis.com/v0/b/turf-arena.firebasestorage.app/o/assets%2Fbadminton_court.jpg?alt=media&token=9dc4f38b-fb40-4934-a4af-92a5dd3357b6",
     },
     {
       'name': 'Tennis',
-      'src': "images/tennis_court.jpg",
+      'src':
+          "https://firebasestorage.googleapis.com/v0/b/turf-arena.firebasestorage.app/o/assets%2Ftennis_court.jpg?alt=media&token=b75f0e08-c9ed-4e5f-8e0c-0e0db76ca087",
     },
     {
       'name': 'Other Turfs',
-      'src': "images/turf_img.jpg",
+      'src':
+          "https://firebasestorage.googleapis.com/v0/b/turf-arena.firebasestorage.app/o/assets%2Fturf_img.jpg?alt=media&token=2c1e98e6-06f8-4b77-b773-356265546339",
     },
   ];
 
@@ -497,7 +502,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               enableSwitchAnimation: true,
                                               child: NearbyTile({
                                                 'name': "Lorem Ipsum",
-                                                'src': 'images/turf_img.jpg',
+                                                'src': 'images/grass.jpg',
                                               }, widget.userDetails),
                                             ),
                                             Skeletonizer(
@@ -505,7 +510,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               enableSwitchAnimation: true,
                                               child: NearbyTile({
                                                 'name': "Lorem Ipsum",
-                                                'src': 'images/turf_img.jpg',
+                                                'src': 'images/grass.jpg',
                                               }, widget.userDetails),
                                             ),
                                           ],
@@ -546,8 +551,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   children: [
                                                     Expanded(
                                                       flex: 3,
-                                                      child: Image.asset(
-                                                        "images/noturfs.gif",
+                                                      child: CachedNetworkImage(
+                                                        placeholder:
+                                                            (context, url) =>
+                                                                Skeletonizer(
+                                                          child: SizedBox(
+                                                            width: 150.0,
+                                                            height: 150.0,
+                                                          ),
+                                                        ),
+                                                        imageUrl:
+                                                            "https://firebasestorage.googleapis.com/v0/b/turf-arena.firebasestorage.app/o/assets%2Fnoturfs.gif?alt=media&token=a1acbf91-7f85-43ce-9427-293fb511edab",
                                                       ),
                                                     ),
                                                     Expanded(
@@ -584,7 +598,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   //     enableSwitchAnimation: true,
                                                   //     child: NearbyTile({
                                                   //       'name': "Lorem Ipsum",
-                                                  //       'src': 'images/turf_img.jpg',
+                                                  //       'src': 'images/grass.jpg',
                                                   //     }, widget.userDetails),
                                                   //   );
                                                   // }
@@ -707,9 +721,9 @@ class SportsTile extends StatelessWidget {
                       // image: AssetImage(turfDetails['src']),
                       image: turfDetails['src'] == null
                           ? AssetImage(
-                              "images/turf_img.jpg",
+                              "images/grass.jpg",
                             )
-                          : AssetImage(
+                          : CachedNetworkImageProvider(
                               turfDetails['src'],
                             ),
                     ),
@@ -806,7 +820,7 @@ class NearbyTile extends StatelessWidget {
                     // image: AssetImage(turfDetails['src']),
                     image: turfDetails['imgList'] == null
                         ? AssetImage(
-                            "images/turf_img.jpg",
+                            "images/grass.jpg",
                           )
                         : CachedNetworkImageProvider(
                             turfDetails['imgList'][0],
